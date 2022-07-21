@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <Description>Sorrend</Description>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <PackageId>Sorrend.MsBuild</PackageId>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NuspecFile>PackageFiles\Sorrend.MsBuild.nuspec</NuspecFile>
+  </PropertyGroup>
+
+  <Target Name="SetDefaultNuspecProperties" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+      <NuspecProperties>
+        id=$(PackageId);
+        version=$(PackageVersion);
+        author=$(Authors);
+        title=$(Title);
+        description=$(PackageDescription.Replace("&lt;", "&amp;lt;"));
+        copyright=$(Copyright.Replace("&lt;", "&amp;lt;"));
+        configuration=$(Configuration);
+        $(NuspecProperties)
+      </NuspecProperties>
+    </PropertyGroup>
+  </Target>
+
+</Project>

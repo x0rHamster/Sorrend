@@ -1,0 +1,36 @@
+﻿root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.xml]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+
+[*.{csproj,props,targets}]
+indent_size = 2
+
+[*.sln]
+indent_style = tab
+
+[*.nuspec]
+indent_size = 2
+
+[*.ruleset]
+indent_size = 2
+
+[*.DotSettings]
+indent_style = tab
+
+[*.cs]
+resharper_arrange_namespace_body_highlighting = warning
+resharper_convert_to_primary_constructor_highlighting = hint
+resharper_member_can_be_private_global_highlighting = hint
+resharper_prefer_concrete_value_over_default_highlighting = hint
+resharper_separate_local_functions_with_jump_statement_highlighting = none

@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="CSharp: NetAnalyzers, StyleCop, Sonar" Description=" " ToolsVersion="15.0">
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="CS8019" Action="Info" />
+    <Rule Id="CS8933" Action="Info" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.NetAnalyzers" RuleNamespace="Microsoft.CodeAnalysis.CSharp.NetAnalyzers">
+    <Rule Id="CA1032" Action="Warning" />
+    <Rule Id="CA1309" Action="Warning" />
+    <Rule Id="CA1311" Action="Warning" />
+    <Rule Id="CA1507" Action="Warning" />
+    <Rule Id="CA2016" Action="Warning" />
+    <Rule Id="CA2234" Action="Warning" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.NetAnalyzers" RuleNamespace="Microsoft.CodeAnalysis.NetAnalyzers">
+    <Rule Id="CA1000" Action="Warning" />
+    <Rule Id="CA1001" Action="Warning" />
+    <Rule Id="CA1003" Action="Warning" />
+    <Rule Id="CA1008" Action="Warning" />
+    <Rule Id="CA1010" Action="Info" />
+    <Rule Id="CA1018" Action="Warning" />
+    <Rule Id="CA1031" Action="Warning" />
+    <Rule Id="CA1033" Action="Warning" />
+    <Rule Id="CA1036" Action="Warning" />
+    <Rule Id="CA1041" Action="Warning" />
+    <Rule Id="CA1044" Action="Warning" />
+    <Rule Id="CA1046" Action="Warning" />
+    <Rule Id="CA1054" Action="Warning" />
+    <Rule Id="CA1055" Action="Warning" />
+    <Rule Id="CA1056" Action="Warning" />
+    <Rule Id="CA1060" Action="Warning" />
+    <Rule Id="CA1061" Action="Warning" />
+    <Rule Id="CA1063" Action="Warning" />
+    <Rule Id="CA1064" Action="Warning" />
+    <Rule Id="CA1065" Action="Warning" />
+    <Rule Id="CA1066" Action="Warning" />
+    <Rule Id="CA1067" Action="Warning" />
+    <Rule Id="CA1068" Action="Warning" />
+    <Rule Id="CA1069" Action="Warning" />
+    <Rule Id="CA1303" Action="Info" />
+    <Rule Id="CA1304" Action="Warning" />
+    <Rule Id="CA1305" Action="Warning" />
+    <Rule Id="CA1308" Action="Warning" />
+    <Rule Id="CA1310" Action="Warning" />
+    <Rule Id="CA1401" Action="Warning" />
+    <Rule Id="CA1708" Action="Warning" />
+    <Rule Id="CA1710" Action="Warning" />
+    <Rule Id="CA1711" Action="Warning" />
+    <Rule Id="CA1713" Action="Warning" />
+    <Rule Id="CA1727" Action="Warning" />
+    <Rule Id="CA1806" Action="Warning" />
+    <Rule Id="CA1810" Action="Warning" />
+    <Rule Id="CA1813" Action="Info" />
+    <Rule Id="CA1815" Action="Warning" />
+    <Rule Id="CA1823" Action="Warning" />
+    <Rule Id="CA1848" Action="None" />
+    <Rule Id="CA1849" Action="Warning" />
+    <Rule Id="CA1859" Action="None" />
+    <Rule Id="CA1860" Action="None" />
+    <Rule Id="CA1862" Action="Warning" />
+    <Rule Id="CA2000" Action="Warning" />
+    <Rule Id="CA2002" Action="Warning" />
+    <Rule Id="CA2012" Action="Warning" />
+    <Rule Id="CA2153" Action="Warning" />
+    <Rule Id="CA2201" Action="Warning" />
+    <Rule Id="CA2207" Action="Warning" />
+    <Rule Id="CA2208" Action="Warning" />
+    <Rule Id="CA2213" Action="Warning" />
+    <Rule Id="CA2214" Action="Warning" />
+    <Rule Id="CA2215" Action="Warning" />
+    <Rule Id="CA2216" Action="Warning" />
+    <Rule Id="CA2225" Action="Warning" />
+    <Rule Id="CA2226" Action="Warning" />
+    <Rule Id="CA2231" Action="Warning" />
+    <Rule Id="CA2241" Action="Warning" />
+    <Rule Id="CA2253" Action="Warning" />
+    <Rule Id="CA2254" Action="Warning" />
+  </Rules>
+  <Rules AnalyzerId="SonarAnalyzer.CSharp" RuleNamespace="SonarAnalyzer.CSharp">
+    <Rule Id="S1067" Action="Info" />
+    <Rule Id="S107" Action="Warning" />
+    <Rule Id="S109" Action="Warning" />
+    <Rule Id="S1110" Action="None" />
+    <Rule Id="S1116" Action="None" />
+    <Rule Id="S1133" Action="None" />
+    <Rule Id="S1134" Action="None" />
+    <Rule Id="S1135" Action="None" />
+    <Rule Id="S1192" Action="Warning" />
+    <Rule Id="S1226" Action="Warning" />
+    <Rule Id="S134" Action="Warning" />
+    <Rule Id="S1541" Action="Warning" />
+    <Rule Id="S1607" Action="None" />
+    <Rule Id="S1698" Action="Warning" />
+    <Rule Id="S1821" Action="Warning" />
+    <Rule Id="S1858" Action="Info" />
+    <Rule Id="S2197" Action="Warning" />
+    <Rule Id="S2325" Action="None" />
+    <Rule Id="S2330" Action="Warning" />
+    <Rule Id="S2333" Action="Info" />
+    <Rule Id="S2952" Action="Warning" />
+    <Rule Id="S3052" Action="Info" />
+    <Rule Id="S3215" Action="Warning" />
+    <Rule Id="S3240" Action="Info" />
+    <Rule Id="S3253" Action="Info" />
+    <Rule Id="S3257" Action="Info" />
+    <Rule Id="S3358" Action="None" />
+    <Rule Id="S3416" Action="Warning" />
+    <Rule Id="S3776" Action="Warning" />
+    <Rule Id="S3902" Action="Warning" />
+    <Rule Id="S3906" Action="Warning" />
+    <Rule Id="S3997" Action="Warning" />
+    <Rule Id="S4226" Action="Warning" />
+    <Rule Id="S4261" Action="Warning" />
+    <Rule Id="S4462" Action="Warning" />
+    <Rule Id="S6354" Action="Warning" />
+    <Rule Id="S6507" Action="Warning" />
+    <Rule Id="S6563" Action="Warning" />
+    <Rule Id="S6602" Action="Info" />
+    <Rule Id="S6603" Action="Info" />
+    <Rule Id="S6605" Action="Info" />
+    <Rule Id="S6608" Action="Info" />
+    <Rule Id="S6609" Action="Info" />
+    <Rule Id="S881" Action="Warning" />
+  </Rules>
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA0001" Action="None" />
+    <Rule Id="SA1101" Action="None" />
+    <Rule Id="SA1118" Action="None" />
+    <Rule Id="SA1201" Action="None" />
+    <Rule Id="SA1202" Action="None" />
+    <Rule Id="SA1204" Action="None" />
+    <Rule Id="SA1309" Action="None" />
+    <Rule Id="SA1512" Action="None" />
+    <Rule Id="SA1515" Action="None" />
+    <Rule Id="SA1600" Action="None" />
+    <Rule Id="SA1601" Action="None" />
+    <Rule Id="SA1602" Action="None" />
+    <Rule Id="SA1611" Action="None" />
+    <Rule Id="SA1615" Action="None" />
+    <Rule Id="SA1618" Action="None" />
+    <Rule Id="SA1633" Action="None" />
+    <Rule Id="SX1101" Action="Warning" />
+    <Rule Id="SX1309" Action="Warning" />
+    <Rule Id="SX1309S" Action="Warning" />
+  </Rules>
+</RuleSet>

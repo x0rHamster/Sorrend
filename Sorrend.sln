@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorrend.IntegrationTests", "tests\Sorrend.IntegrationTests\Sorrend.IntegrationTests.csproj", "{983C1CD0-894A-4EF8-B617-87D876424FEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorrend.MsBuildTool", "src\Sorrend.MsBuildTool\Sorrend.MsBuildTool.csproj", "{15640F27-D57D-487B-BD1A-015054813953}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{983C1CD0-894A-4EF8-B617-87D876424FEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{983C1CD0-894A-4EF8-B617-87D876424FEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{983C1CD0-894A-4EF8-B617-87D876424FEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{983C1CD0-894A-4EF8-B617-87D876424FEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15640F27-D57D-487B-BD1A-015054813953}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15640F27-D57D-487B-BD1A-015054813953}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15640F27-D57D-487B-BD1A-015054813953}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15640F27-D57D-487B-BD1A-015054813953}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

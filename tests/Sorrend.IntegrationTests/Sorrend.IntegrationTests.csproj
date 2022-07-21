@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Threading.Tasks.Extensions" />
+    <PackageReference Include="Xunit.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sorrend.MsBuildTool\Sorrend.MsBuildTool.csproj">
+      <CopyPackageToOutputDirectory>true</CopyPackageToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target Name="CopyProjectReferencePackagesToOutputDirectory" AfterTargets="CopyFilesToOutputDirectory">
+
+    <MSBuild Projects="@(ProjectReference)"
+             Targets="_GetOutputItemsFromPack"
+             Properties="PackageReferenceCompatibleProjectStyle=true"
+             Condition=" '%(ProjectReference.CopyPackageToOutputDirectory)' == 'true' ">
+      <Output TaskParameter="TargetOutputs" ItemName="ProjectReferencePackOutput" />
+    </MSBuild>
+
+    <ItemGroup>
+      <ProjectReferencePackage Include="@(ProjectReferencePackOutput)" Condition=" '%(Extension)' == '.nupkg' ">
+        <TargetPath>$(OutDir)$([System.IO.Path]::GetFileNameWithoutExtension(%(OriginalItemSpec))).nupkg</TargetPath>
+      </ProjectReferencePackage>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(ProjectReferencePackage)"
+          DestinationFiles="@(ProjectReferencePackage->'%(TargetPath)')"
+          SkipUnchangedFiles="true">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+
+  </Target>
+
+</Project>
