@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorrend.IntegrationTests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorrend.MsBuildTool", "src\Sorrend.MsBuildTool\Sorrend.MsBuildTool.csproj", "{15640F27-D57D-487B-BD1A-015054813953}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorrend.Core", "src\Sorrend.Core\Sorrend.Core.csproj", "{0E10434B-8E6B-48DF-A78B-671772DD57C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{15640F27-D57D-487B-BD1A-015054813953}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15640F27-D57D-487B-BD1A-015054813953}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15640F27-D57D-487B-BD1A-015054813953}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E10434B-8E6B-48DF-A78B-671772DD57C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E10434B-8E6B-48DF-A78B-671772DD57C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E10434B-8E6B-48DF-A78B-671772DD57C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E10434B-8E6B-48DF-A78B-671772DD57C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

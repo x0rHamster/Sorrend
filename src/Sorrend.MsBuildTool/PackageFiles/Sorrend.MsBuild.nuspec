@@ -8,10 +8,12 @@
     <copyright>$copyright$</copyright>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <developmentDependency>true</developmentDependency>
   </metadata>
   <files>
     <file src="**\*.*" />
     <file src="..\..\..\LICENSE.md" />
+    <file src="..\..\..\THIRD-PARTY-NOTICES.md" />
     <file src="..\bin\$configuration$\**\*.*" exclude="**\*.nupkg;**\*.pdb" target="tools" />
   </files>
 </package>

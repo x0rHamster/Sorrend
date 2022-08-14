@@ -1,0 +1,93 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <_SorrendAssemblyVersionFilePath>$(IntermediateOutputPath)$(MSBuildProjectName).Sorrend.xml</_SorrendAssemblyVersionFilePath>
+    <_SorrendGeneratedCodeFilePath>$(IntermediateOutputPath)$(MSBuildProjectName).Sorrend$(DefaultLanguageSourceExtension)</_SorrendGeneratedCodeFilePath>
+
+    <_SorrendCalculateAssemblyVersionCommand>
+      "$(MSBuildThisFileDirectory)..\tools\net472\Sorrend.MsBuildTool.exe"
+      "$(MSBuildProjectFullPath)"
+      "$(_SorrendAssemblyVersionFilePath)"
+    </_SorrendCalculateAssemblyVersionCommand>
+
+    <_SorrendBuildTargets>
+      BeforeCompile;
+      CoreCompile;
+      GetAssemblyVersion;
+    </_SorrendBuildTargets>
+
+    <_SorrendPackTargets>
+      _GetOutputItemsFromPack;
+      GenerateNuspec;
+    </_SorrendPackTargets>
+  </PropertyGroup>
+
+  <Target Name="_SorrendCalculateAssemblyVersion"
+          BeforeTargets="$(_SorrendBuildTargets);$(_SorrendPackTargets)">
+
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+
+    <Exec Command="$([System.Text.RegularExpressions.Regex]::Replace('$(_SorrendCalculateAssemblyVersionCommand)', '\s+', ' '))" />
+
+    <ItemGroup Condition=" Exists('$(_SorrendAssemblyVersionFilePath)') ">
+      <FileWrites Include="$(_SorrendAssemblyVersionFilePath)" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="_SorrendSetProjectProperties"
+          BeforeTargets="$(_SorrendBuildTargets);$(_SorrendPackTargets)"
+          Condition=" Exists('$(_SorrendAssemblyVersionFilePath)') ">
+
+    <XmlPeek XmlInputPath="$(_SorrendAssemblyVersionFilePath)"
+             Namespaces="&lt;Namespace Prefix='x' Uri='urn:sorrend:v0' /&gt;"
+             Query="/x:AssemblyVersion/x:ProjectProperties/x:ProjectProperty">
+      <Output TaskParameter="Result" ItemName="_SorrendAssemblyVersionProjectProperty" />
+    </XmlPeek>
+
+    <ItemGroup>
+      <_SorrendAssemblyVersionProjectProperty>
+        <Name>$([System.Text.RegularExpressions.Regex]::Replace('%(Identity)', '^.+\bName="(.+?)".+$', '$1'))</Name>
+        <Value>$([System.Text.RegularExpressions.Regex]::Replace('%(Identity)', '^.+\bValue="(.*?)".+$', '$1'))</Value>
+      </_SorrendAssemblyVersionProjectProperty>
+    </ItemGroup>
+
+    <CreateProperty Value="%(_SorrendAssemblyVersionProjectProperty.Value)">
+      <Output TaskParameter="Value" PropertyName="%(_SorrendAssemblyVersionProjectProperty.Name)" />
+    </CreateProperty>
+
+  </Target>
+
+  <Target Name="_SorrendWriteGeneratedCode"
+          Inputs="$(_SorrendAssemblyVersionFilePath)"
+          Outputs="$(_SorrendGeneratedCodeFilePath)"
+          BeforeTargets="$(_SorrendBuildTargets)"
+          Condition=" Exists('$(_SorrendAssemblyVersionFilePath)') ">
+
+    <XmlPeek XmlInputPath="$(_SorrendAssemblyVersionFilePath)"
+             Namespaces="&lt;Namespace Prefix='x' Uri='urn:sorrend:v0' /&gt;"
+             Query="/x:AssemblyVersion/x:AssemblyAttributes/x:AssemblyAttribute">
+      <Output TaskParameter="Result" ItemName="_SorrendAssemblyVersionAssemblyAttribute" />
+    </XmlPeek>
+
+    <ItemGroup>
+      <_SorrendAssemblyVersionAssemblyAttribute>
+        <TypeName>$([System.Text.RegularExpressions.Regex]::Replace('%(Identity)', '^.+\bTypeName="(.+?)".+$', '$1'))</TypeName>
+        <Parameter1>$([System.Text.RegularExpressions.Regex]::Replace('%(Identity)', '^.+\bParameter1="(.*?)".+$', '$1'))</Parameter1>
+      </_SorrendAssemblyVersionAssemblyAttribute>
+
+      <_SorrendGeneratedCodeAssemblyAttribute Include="%(_SorrendAssemblyVersionAssemblyAttribute.TypeName)">
+        <_Parameter1>%(Parameter1)</_Parameter1>
+      </_SorrendGeneratedCodeAssemblyAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment AssemblyAttributes="@(_SorrendGeneratedCodeAssemblyAttribute)"
+                       Language="$(Language)"
+                       OutputFile="$(_SorrendGeneratedCodeFilePath)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
+
+  </Target>
+
+</Project>
