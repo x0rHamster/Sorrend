@@ -65,7 +65,7 @@ namespace Sorrend.IntegrationTests.Scenarios
 
             var project = await _projectFactory.CreateAsync(
                 specification => specification
-                    .WithTargetFrameworks(TargetFramework.NetFramework472, TargetFramework.Net6)
+                    .WithTargetFrameworks(TargetFramework.NetFramework472, TargetFramework.Net8)
                     .WithReference(packageManager.PackageUnderTest));
 
             var repository = await _gitRepositoryFactory.CreateAsync(project.DirectoryPath);

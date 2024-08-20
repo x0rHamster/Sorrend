@@ -32,7 +32,7 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                 }
 
                 return EffectiveSdkStyle
-                    ? TargetFramework.Net6
+                    ? TargetFramework.Net8
                     : TargetFramework.NetFramework472;
             }
         }

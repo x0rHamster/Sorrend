@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿using System.Linq;
 using System.Xml.Linq;
 
 namespace Sorrend.IntegrationTests.Tools.Projects
@@ -62,10 +61,6 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                         : null);
         }
 
-        [SuppressMessage(
-            "Major Code Smell",
-            "S1854:Unused assignments should be removed",
-            Justification = "False positive")]
         private static XDocument GetNonSdkStyleProjectXml(
             ProjectSpecification specification,
             string globalPackagesDirectoryPath)

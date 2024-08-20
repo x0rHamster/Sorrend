@@ -3,6 +3,6 @@
     public enum TargetFramework
     {
         NetFramework472,
-        Net6,
+        Net8,
     }
 }

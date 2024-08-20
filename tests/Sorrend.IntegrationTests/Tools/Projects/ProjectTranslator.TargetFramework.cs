@@ -11,8 +11,8 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                 case TargetFramework.NetFramework472:
                     return "net472";
 
-                case TargetFramework.Net6:
-                    return "net6.0";
+                case TargetFramework.Net8:
+                    return "net8.0";
 
                 default:
                     throw new ArgumentOutOfRangeException(

@@ -19,7 +19,7 @@ namespace Sorrend.MsBuildTool.Logging
             IExternalScopeProvider scopeProvider,
             TextWriter textWriter)
         {
-            var message = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception);
+            var message = logEntry.Formatter(logEntry.State, logEntry.Exception);
             if (message == null)
             {
                 return;
