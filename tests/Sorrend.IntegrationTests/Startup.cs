@@ -4,6 +4,7 @@ using Sorrend.IntegrationTests.Tools.Assemblies;
 using Sorrend.IntegrationTests.Tools.Packages;
 using Sorrend.IntegrationTests.Tools.Projects;
 using Sorrend.IntegrationTests.Tools.Repositories;
+using Sorrend.IntegrationTests.Tools.SystemUnderTest;
 
 namespace Sorrend.IntegrationTests
 {
@@ -18,6 +19,7 @@ namespace Sorrend.IntegrationTests
             services.AddSingleton<BuildSystem.Provider>();
             services.AddSingleton<AssemblyAnalyzer>();
             services.AddSingleton<GitRepositoryFactory>();
+            services.AddSingleton<HeadlessSut>();
         }
     }
 }

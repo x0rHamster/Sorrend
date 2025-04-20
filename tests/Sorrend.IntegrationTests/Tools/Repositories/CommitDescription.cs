@@ -1,12 +1,17 @@
-﻿namespace Sorrend.IntegrationTests.Tools.Repositories
+﻿using Sorrend.Core.VersionControl;
+
+namespace Sorrend.IntegrationTests.Tools.Repositories
 {
     public class CommitDescription
     {
         public string ShortHash { get; }
 
-        public CommitDescription(string shortHash)
+        public CommitHash Hash { get; }
+
+        public CommitDescription(string hash, int shortHashLength)
         {
-            ShortHash = shortHash;
+            Hash = new CommitHash(hash);
+            ShortHash = Hash.GetShortHash(shortHashLength);
         }
     }
 }

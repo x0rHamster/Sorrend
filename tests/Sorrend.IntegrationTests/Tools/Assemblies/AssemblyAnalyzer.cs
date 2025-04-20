@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Sorrend.IntegrationTests.Tools.Assemblies
@@ -7,8 +10,18 @@ namespace Sorrend.IntegrationTests.Tools.Assemblies
     {
         public Task<AssemblyDescription> LoadAsync(string filePath)
         {
-            var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
-            return Task.FromResult(new AssemblyDescription(fileVersionInfo));
+            var resolver = new PathAssemblyResolver(
+                Directory.GetFiles(
+                    RuntimeEnvironment.GetRuntimeDirectory(),
+                    "*.dll"));
+
+            using (var context = new MetadataLoadContext(resolver))
+            {
+                var assembly = context.LoadFromAssemblyPath(filePath);
+                var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
+
+                return Task.FromResult(new AssemblyDescription(assembly, fileVersionInfo));
+            }
         }
     }
 }

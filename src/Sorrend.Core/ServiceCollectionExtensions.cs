@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Sorrend.Core.AssemblyVersioning;
+using Sorrend.Core.VersionControl;
 
 namespace Sorrend.Core
 {
@@ -6,6 +8,15 @@ namespace Sorrend.Core
     {
         public static IServiceCollection AddSorrendCore(this IServiceCollection services)
         {
+            services.AddSingleton<GitVersionControlSystem>();
+            services.AddSingleton<RepositoryLocator>();
+
+            services.AddSingleton<CommitVersionParser>();
+            services.AddSingleton<SemanticVersioningScheme>();
+
+            services.AddSingleton<AssemblyVersionCalculationFactory>();
+            services.AddSingleton<AssemblyVersionSerializer>();
+
             services.AddSingleton<ApplicationServices>();
 
             return services;

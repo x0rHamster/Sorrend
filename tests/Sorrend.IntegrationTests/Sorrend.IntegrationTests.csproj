@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Reflection.MetadataLoadContext" />
     <PackageReference Include="System.Threading.Tasks.Extensions" />
     <PackageReference Include="Xunit.DependencyInjection" />
   </ItemGroup>

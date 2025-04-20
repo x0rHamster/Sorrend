@@ -7,6 +7,8 @@ namespace Sorrend.IntegrationTests.Tools.Projects
 {
     public class ProjectSpecification
     {
+        public Guid ChangeToken { get; set; } = Guid.NewGuid();
+
         public bool? SdkStyle { get; set; }
 
         public List<TargetFramework> TargetFrameworks { get; } = new List<TargetFramework>();

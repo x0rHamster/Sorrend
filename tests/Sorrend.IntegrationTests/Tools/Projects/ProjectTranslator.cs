@@ -1,10 +1,15 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
+using Sorrend.IntegrationTests.Utilities;
+using Xunit;
 
 namespace Sorrend.IntegrationTests.Tools.Projects
 {
     public static partial class ProjectTranslator
     {
+        private const string ChangeTokenPropertyName = "SorrendTestProjectChangeToken";
+
         private static readonly XNamespace ProjectXmlNamespace = "http://schemas.microsoft.com/developer/msbuild/2003";
 
         public static XDocument GetProjectXml(
@@ -30,7 +35,10 @@ namespace Sorrend.IntegrationTests.Tools.Projects
 
             return Project(
                 PropertyGroup(
-                    targetFrameworkProperty),
+                    targetFrameworkProperty,
+                    Property(
+                        ChangeTokenPropertyName,
+                        specification.ChangeToken.ToString())),
                 ItemGroup(
                     specification.PackageReferences
                         .Select(x => PackageReference(x.Id, x.Version, x.DevelopmentDependency))));
@@ -77,7 +85,10 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                     Property("OutputType", "Library"),
                     Property(
                         "TargetFrameworkVersion",
-                        GetTargetFrameworkVersion(specification.EffectiveTargetFramework))),
+                        GetTargetFrameworkVersion(specification.EffectiveTargetFramework)),
+                    Property(
+                        ChangeTokenPropertyName,
+                        specification.ChangeToken.ToString())),
                 Import(@"$(MSBuildToolsPath)\Microsoft.CSharp.targets"),
                 specification.PackageReferences
                     .Where(x => x.BuildTargets.Exists)
@@ -97,6 +108,23 @@ namespace Sorrend.IntegrationTests.Tools.Projects
 
             XElement Property(string name, string value)
                 => new XElement(ns + name, value);
+        }
+
+        public static void SetProjectChangeToken(XDocument projectXml, Guid changeToken)
+        {
+            var ns = projectXml.Root?.GetDefaultNamespace();
+            if (!string.IsNullOrEmpty(ns?.NamespaceName))
+            {
+                Assert.Equal(ProjectXmlNamespace, ns);
+            }
+
+            var changeTokenElement = projectXml
+                .ElementOrThrow(ns + "Project")
+                .Elements(ns + "PropertyGroup")
+                .SelectMany(x => x.Elements(ns + ChangeTokenPropertyName))
+                .Single();
+
+            changeTokenElement.Value = changeToken.ToString();
         }
 
         public static XDocument GetPackagesConfigXml(ProjectSpecification specification)

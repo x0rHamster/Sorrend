@@ -41,9 +41,14 @@ namespace Sorrend.MsBuildTool
                             projectFilePath,
                             assemblyVersionFilePath);
                 }
+                catch (UserOrientedException e)
+                {
+                    logger.LogUserOrientedError(e);
+                    Environment.ExitCode = -1;
+                }
                 catch (Exception e)
                 {
-                    logger.LogCritical(e, "The application crashed due to an unhandled exception.");
+                    logger.LogApplicationCrash(e);
                     Environment.ExitCode = -1;
                 }
             }

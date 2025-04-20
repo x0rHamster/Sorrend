@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Sorrend.IntegrationTests.Tools.Packages;
 
 namespace Sorrend.IntegrationTests.Tools.Projects
@@ -56,6 +57,17 @@ namespace Sorrend.IntegrationTests.Tools.Projects
             }
 
             return new ProjectDescription(projectFilePath, specification);
+        }
+
+        public Task UpdateAsync(ProjectDescription project)
+        {
+            var changeToken = Guid.NewGuid();
+
+            var projectXml = XDocument.Load(project.FilePath);
+            ProjectTranslator.SetProjectChangeToken(projectXml, changeToken);
+            projectXml.Save(project.FilePath);
+
+            return Task.CompletedTask;
         }
     }
 }
