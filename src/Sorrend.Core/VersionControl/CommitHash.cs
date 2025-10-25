@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Sorrend.Core.UserMessages;
 using Sorrend.Core.Utilities;
 
 namespace Sorrend.Core.VersionControl
@@ -23,12 +24,12 @@ namespace Sorrend.Core.VersionControl
         {
             if (!value.IsHexNumber())
             {
-                throw new UserOrientedException($"The commit hash \"{value}\" must be a hexadecimal number.");
+                throw UserOrientedExceptions.CommitHashMustBeHexadecimal(value);
             }
 
             if (value.Length < MinimumLength)
             {
-                throw new UserOrientedException($"The commit hash \"{value}\" is shorter than {MinimumLength}.");
+                throw UserOrientedExceptions.TooShortCommitHash(value, MinimumLength);
             }
         }
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Sorrend.Core.AssemblyVersioning;
+using Sorrend.Core.UserMessages;
 using Sorrend.Core.VersionControl;
 
 namespace Sorrend.Core
@@ -49,11 +50,14 @@ namespace Sorrend.Core
 
             foreach (var commit in commits)
             {
-                calculation.Add(commit);
-
-                if (calculation.HasResult)
+                using (UserMessageScopes.Commit(commit))
                 {
-                    break;
+                    calculation.Add(commit);
+
+                    if (calculation.HasResult)
+                    {
+                        break;
+                    }
                 }
             }
 

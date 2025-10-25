@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using JetBrains.Annotations;
+using Sorrend.Core.UserMessages;
 using Sorrend.Core.Utilities;
 
 namespace Sorrend.Core.Versions
@@ -39,8 +40,9 @@ namespace Sorrend.Core.Versions
             var normalVersionIdentifiers = normalVersion.Split('.');
             if (normalVersionIdentifiers.Length > MaximumNormalVersionIdentifierCount)
             {
-                throw new UserOrientedException(
-                    $"The normal version number \"{normalVersion}\" contains more than {MaximumNormalVersionIdentifierCount} identifiers.");
+                throw UserOrientedExceptions.TooManyNormalVersionIdentifiers(
+                    normalVersion,
+                    MaximumNormalVersionIdentifierCount);
             }
 
             var majorVersion = ParseNormalVersionIdentifier(normalVersionIdentifiers, 0);
@@ -49,21 +51,19 @@ namespace Sorrend.Core.Versions
 
             if (majorVersion == 0 && minorVersion == 0 && patchVersion == 0)
             {
-                throw new UserOrientedException("The zero version number \"0.0.0\" is not supported.");
+                throw UserOrientedExceptions.ZeroNormalVersion();
             }
 
             var preReleaseSuffix = match.Groups["prerelease"].Value;
             if (preReleaseSuffix != string.Empty && !StrictPreReleaseSuffixRegex.IsMatch(preReleaseSuffix))
             {
-                throw new UserOrientedException(
-                    $"The pre-release suffix \"{preReleaseSuffix}\" must be a series of dot-separated identifiers preceded by a hyphen.");
+                throw UserOrientedExceptions.InvalidPreReleaseSuffix(preReleaseSuffix);
             }
 
             var buildMetadataSuffix = match.Groups["build"].Value;
             if (buildMetadataSuffix != string.Empty && !StrictBuildMetadataSuffixRegex.IsMatch(buildMetadataSuffix))
             {
-                throw new UserOrientedException(
-                    $"The build metadata \"{buildMetadataSuffix}\" must be a series of dot-separated identifiers preceded by a plus sign.");
+                throw UserOrientedExceptions.InvalidBuildMetadataSuffix(buildMetadataSuffix);
             }
 
             return new SemanticVersion(
@@ -76,7 +76,7 @@ namespace Sorrend.Core.Versions
 
         public static SemanticVersion Parse(string version)
             => ParseOrDefault(version)
-                ?? throw new UserOrientedException($"\"{version}\" cannot be parsed as a version number.");
+                ?? throw UserOrientedExceptions.InvalidSemanticVersion(version);
 
         private static int ParseNormalVersionIdentifier(string[] identifiers, int identifierIndex)
         {
@@ -89,8 +89,7 @@ namespace Sorrend.Core.Versions
 
             if (!identifier.TryParseCanonicalInteger(out var value) || value < 0)
             {
-                throw new UserOrientedException(
-                    $"The normal version identifier \"{identifier}\" must be a non-negative integer.");
+                throw UserOrientedExceptions.NormalVersionIdentifierMustBeNonNegative(identifier);
             }
 
             return value;

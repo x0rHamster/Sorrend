@@ -1,6 +1,6 @@
 ﻿using System;
-using Sorrend.Core;
 using Sorrend.Core.AssemblyVersioning;
+using Sorrend.Core.UserMessages;
 using Sorrend.UnitTests.Tools;
 using Xunit;
 

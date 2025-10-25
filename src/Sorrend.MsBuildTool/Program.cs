@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sorrend.Core;
+using Sorrend.Core.UserMessages;
 using Sorrend.MsBuildTool.Logging;
 
 namespace Sorrend.MsBuildTool

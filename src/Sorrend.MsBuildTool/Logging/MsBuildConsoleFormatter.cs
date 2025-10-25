@@ -1,7 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
+using Sorrend.Core.Utilities.MessageTemplates;
 
 namespace Sorrend.MsBuildTool.Logging
 {
@@ -19,17 +23,11 @@ namespace Sorrend.MsBuildTool.Logging
             IExternalScopeProvider scopeProvider,
             TextWriter textWriter)
         {
-            var message = logEntry.Formatter(logEntry.State, logEntry.Exception);
-            if (message == null)
-            {
-                return;
-            }
-
             textWriter.Write(nameof(Sorrend));
             textWriter.Write(" : ");
             textWriter.Write(FormatLogLevel(logEntry.LogLevel));
             textWriter.Write(" : ");
-            textWriter.Write(message);
+            textWriter.Write(FormatMessage(logEntry, textWriter.FormatProvider));
 
             if (logEntry.Exception != null)
             {
@@ -44,5 +42,27 @@ namespace Sorrend.MsBuildTool.Logging
             => logLevel >= LogLevel.Error ? "ERROR"
                 : logLevel == LogLevel.Warning ? "Warning"
                 : "Message";
+
+        private static string FormatMessage<TState>(
+            LogEntry<TState> logEntry,
+            IFormatProvider formatProvider)
+        {
+            if (
+                logEntry.State is IReadOnlyList<KeyValuePair<string, object>> items
+                && items[items.Count - 1].Value is string messageTemplate)
+            {
+                var arguments = items
+                    .Take(items.Count - 1)
+                    .Select(x => x.Value)
+                    .ToArray();
+
+                return MessageFormatter.Format(
+                    messageTemplate,
+                    arguments,
+                    formatProvider);
+            }
+
+            return logEntry.Formatter(logEntry.State, logEntry.Exception);
+        }
     }
 }

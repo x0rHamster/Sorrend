@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using Sorrend.Core.UserMessages;
 
 namespace Sorrend.Core.Versions
 {
@@ -82,8 +83,7 @@ namespace Sorrend.Core.Versions
             }
             catch (OverflowException)
             {
-                throw new UserOrientedException(
-                    "Version increments cause the normal version number to overflow. Increase a higher-order normal version identifier.");
+                throw UserOrientedExceptions.IncrementOverflowsNormalVersion();
             }
         }
 
@@ -146,8 +146,7 @@ namespace Sorrend.Core.Versions
             }
             catch (OverflowException)
             {
-                throw new UserOrientedException(
-                    "Version increments cause the pre-release counter to overflow. Create a release version.");
+                throw UserOrientedExceptions.IncrementOverflowsPreReleaseCounter();
             }
         }
 

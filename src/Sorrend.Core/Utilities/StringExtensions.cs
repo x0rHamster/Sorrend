@@ -12,6 +12,11 @@ namespace Sorrend.Core.Utilities
         public static bool IsInteger(this string value)
             => value.TryParseInteger(out _);
 
+        public static int ParseInteger(this string value)
+            => value.TryParseInteger(out var result)
+                ? result
+                : throw new FormatException($"\"{value}\" cannot be parsed as an integer.");
+
         public static bool TryParseCanonicalInteger(this string value, out int result)
             => value.TryParseInteger(out result)
                 && result.ToString(CultureInfo.InvariantCulture) == value;

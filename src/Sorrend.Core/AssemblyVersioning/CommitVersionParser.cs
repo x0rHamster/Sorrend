@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sorrend.Core.UserMessages;
 using Sorrend.Core.Utilities;
 using Sorrend.Core.VersionControl;
 using Sorrend.Core.Versions;
@@ -17,17 +18,20 @@ namespace Sorrend.Core.AssemblyVersioning
 
             foreach (var tag in tags)
             {
-                if (tag.IsInteger())
+                using (UserMessageScopes.CommitTag(tag))
                 {
-                    continue;
-                }
+                    if (tag.IsInteger())
+                    {
+                        continue;
+                    }
 
-                var normalizedCommitTag = tag.TrimPrefix("v", StringComparison.OrdinalIgnoreCase);
-                var candidate = SemanticVersion.ParseOrDefault(normalizedCommitTag);
+                    var normalizedCommitTag = tag.TrimPrefix("v", StringComparison.OrdinalIgnoreCase);
+                    var candidate = SemanticVersion.ParseOrDefault(normalizedCommitTag);
 
-                if (candidate != null)
-                {
-                    candidates.Add(candidate);
+                    if (candidate != null)
+                    {
+                        candidates.Add(candidate);
+                    }
                 }
             }
 
@@ -38,8 +42,9 @@ namespace Sorrend.Core.AssemblyVersioning
         {
             if (!identifier.StartsWith(CommitHashPreReleaseIdentifierPrefix, StringComparison.Ordinal))
             {
-                throw new UserOrientedException(
-                    $"The commit pre-release identifier \"{identifier}\" does not start with \"{CommitHashPreReleaseIdentifierPrefix}\".");
+                throw UserOrientedExceptions.CommitHashPreReleaseIdentifierWithoutPrefix(
+                    identifier,
+                    CommitHashPreReleaseIdentifierPrefix);
             }
 
             var identifierHash = identifier.Substring(CommitHashPreReleaseIdentifierPrefix.Length);
@@ -47,8 +52,9 @@ namespace Sorrend.Core.AssemblyVersioning
 
             if (!commitHash.StartsWith(identifierHash))
             {
-                throw new UserOrientedException(
-                    $"The commit pre-release identifier \"{identifierHash}\" must refer to the commit \"{commitHash}\".");
+                throw UserOrientedExceptions.CommitHashPreReleaseIdentifierDiffersFromCommit(
+                    identifierHash,
+                    commitHash);
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using JetBrains.Annotations;
+using Sorrend.Core.UserMessages;
 using Sorrend.Core.Utilities;
 using Sorrend.Core.VersionControl;
 using Sorrend.Core.Versions;
@@ -47,8 +48,7 @@ namespace Sorrend.Core.AssemblyVersioning
 
         private static SemanticVersion GetSingleBaseVersion(IReadOnlyCollection<SemanticVersion> candidates)
             => candidates.Count > 1
-                ? throw new UserOrientedException(
-                    $"Version numbers \"{string.Join("\", \"", candidates)}\" cannot be reduced to a single version number.")
+                ? throw UserOrientedExceptions.MultipleBaseVersions(candidates)
                 : candidates.First();
 
         private static void ValidateBaseVersion(SemanticVersion version)
@@ -57,8 +57,7 @@ namespace Sorrend.Core.AssemblyVersioning
                 version.PreReleaseIdentifiers.TryGetValue(index: 0, out var prefixIdentifier)
                 && prefixIdentifier.IsInteger())
             {
-                throw new UserOrientedException(
-                    $"The numeric pre-release prefix \"{prefixIdentifier}\" is not supported.");
+                throw UserOrientedExceptions.NumericPreReleasePrefix(prefixIdentifier);
             }
 
             if (
@@ -67,14 +66,14 @@ namespace Sorrend.Core.AssemblyVersioning
                     !counterIdentifier.TryParseCanonicalInteger(out var counterIdentifierValue)
                     || counterIdentifierValue < 0))
             {
-                throw new UserOrientedException(
-                    $"The pre-release counter \"{counterIdentifier}\" must be a non-negative integer.");
+                throw UserOrientedExceptions.PreReleaseCounterMustBeNonNegative(counterIdentifier);
             }
 
             if (version.PreReleaseIdentifiers.Count > MaximumPreReleaseIdentifierCount)
             {
-                throw new UserOrientedException(
-                    $"The pre-release suffix \"{version.PreReleaseSuffix}\" contains more than {MaximumPreReleaseIdentifierCount} identifiers.");
+                throw UserOrientedExceptions.TooManyPreReleaseIdentifiers(
+                    version.PreReleaseSuffix,
+                    MaximumPreReleaseIdentifierCount);
             }
         }
 

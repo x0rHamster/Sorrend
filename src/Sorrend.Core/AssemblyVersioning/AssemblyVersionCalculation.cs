@@ -1,4 +1,5 @@
 ﻿using System;
+using Sorrend.Core.UserMessages;
 using Sorrend.Core.VersionControl;
 using Sorrend.Core.Versions;
 
@@ -32,11 +33,14 @@ namespace Sorrend.Core.AssemblyVersioning
             var baseVersionFromCommit = _versioningScheme.FindBaseVersion(commit);
             if (baseVersionFromCommit != null)
             {
-                ValidateAssemblyVersion(baseVersionFromCommit);
+                using (UserMessageScopes.Version(baseVersionFromCommit))
+                {
+                    ValidateAssemblyVersion(baseVersionFromCommit);
 
-                _baseVersion = baseVersionFromCommit;
-                _latestIncrementCommit = _latestIncrementCommit ?? commit;
-                return;
+                    _baseVersion = baseVersionFromCommit;
+                    _latestIncrementCommit = _latestIncrementCommit ?? commit;
+                    return;
+                }
             }
 
             _versioningScheme.UpdateVersionIncrement(_versionIncrement);
@@ -46,18 +50,23 @@ namespace Sorrend.Core.AssemblyVersioning
         public AssemblyVersionProperties GetResult()
         {
             var baseVersion = _baseVersion ?? _versioningScheme.GetInitialVersion();
+            using (UserMessageScopes.BaseVersion(baseVersion))
+            {
+                // TODO increment version should indicate that there were no commits
+                var latestIncrementCommit = _latestIncrementCommit ?? throw new NotImplementedException();
 
-            // TODO increment version should indicate that there were no commits
-            var latestIncrementCommit = _latestIncrementCommit ?? throw new NotImplementedException();
+                var latestIncrementVersion = _versioningScheme.GetIncrementVersion(
+                    baseVersion,
+                    _versionIncrement,
+                    latestIncrementCommit);
 
-            var latestIncrementVersion = _versioningScheme.GetIncrementVersion(
-                baseVersion,
-                _versionIncrement,
-                latestIncrementCommit);
+                using (UserMessageScopes.Version(latestIncrementVersion))
+                {
+                    ValidateAssemblyVersion(latestIncrementVersion);
 
-            ValidateAssemblyVersion(latestIncrementVersion);
-
-            return new AssemblyVersionProperties(latestIncrementVersion);
+                    return new AssemblyVersionProperties(latestIncrementVersion);
+                }
+            }
         }
 
         private static void ValidateAssemblyVersion(SemanticVersion version)
@@ -71,8 +80,9 @@ namespace Sorrend.Core.AssemblyVersioning
         {
             if (identifier > MaximumAssemblyNormalVersionIdentifier)
             {
-                throw new UserOrientedException(
-                    $"The normal version identifier {identifier} is greater than {MaximumAssemblyNormalVersionIdentifier}.");
+                throw UserOrientedExceptions.NormalVersionIdentifierTooLarge(
+                    identifier,
+                    MaximumAssemblyNormalVersionIdentifier);
             }
         }
     }
