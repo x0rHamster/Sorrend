@@ -5,23 +5,17 @@ using Sorrend.Core.Versions;
 
 namespace Sorrend.Core.AssemblyVersioning
 {
-    public class AssemblyVersionCalculation
+    public class AssemblyVersionCalculation(SemanticVersioningScheme versioningScheme)
     {
         private const int MaximumAssemblyNormalVersionIdentifier = 65534;
 
-        private readonly SemanticVersioningScheme _versioningScheme;
-        private readonly SemanticVersionIncrement _versionIncrement = new SemanticVersionIncrement();
+        private readonly SemanticVersionIncrement _versionIncrement = new();
 
-        private SemanticVersion _baseVersion;
-        private Commit _latestIncrementCommit;
+        private SemanticVersion? _baseVersion;
+        private Commit? _latestIncrementCommit;
 
         public bool HasResult
             => _baseVersion != null;
-
-        public AssemblyVersionCalculation(SemanticVersioningScheme versioningScheme)
-        {
-            _versioningScheme = versioningScheme;
-        }
 
         public void Add(Commit commit)
         {
@@ -30,43 +24,40 @@ namespace Sorrend.Core.AssemblyVersioning
                 return;
             }
 
-            var baseVersionFromCommit = _versioningScheme.FindBaseVersion(commit);
+            var baseVersionFromCommit = versioningScheme.FindBaseVersion(commit);
             if (baseVersionFromCommit != null)
             {
-                using (UserMessageScopes.Version(baseVersionFromCommit))
-                {
-                    ValidateAssemblyVersion(baseVersionFromCommit);
+                using var versionScope = UserMessageScopes.Version(baseVersionFromCommit);
 
-                    _baseVersion = baseVersionFromCommit;
-                    _latestIncrementCommit = _latestIncrementCommit ?? commit;
-                    return;
-                }
+                ValidateAssemblyVersion(baseVersionFromCommit);
+
+                _baseVersion = baseVersionFromCommit;
+                _latestIncrementCommit ??= commit;
+                return;
             }
 
-            _versioningScheme.UpdateVersionIncrement(_versionIncrement);
-            _latestIncrementCommit = _latestIncrementCommit ?? commit;
+            versioningScheme.UpdateVersionIncrement(_versionIncrement);
+            _latestIncrementCommit ??= commit;
         }
 
         public AssemblyVersionProperties GetResult()
         {
-            var baseVersion = _baseVersion ?? _versioningScheme.GetInitialVersion();
-            using (UserMessageScopes.BaseVersion(baseVersion))
-            {
-                // TODO increment version should indicate that there were no commits
-                var latestIncrementCommit = _latestIncrementCommit ?? throw new NotImplementedException();
+            var baseVersion = _baseVersion ?? versioningScheme.GetInitialVersion();
+            using var baseVersionScope = UserMessageScopes.BaseVersion(baseVersion);
 
-                var latestIncrementVersion = _versioningScheme.GetIncrementVersion(
-                    baseVersion,
-                    _versionIncrement,
-                    latestIncrementCommit);
+            // TODO increment version should indicate that there were no commits
+            var latestIncrementCommit = _latestIncrementCommit ?? throw new NotImplementedException();
 
-                using (UserMessageScopes.Version(latestIncrementVersion))
-                {
-                    ValidateAssemblyVersion(latestIncrementVersion);
+            var latestIncrementVersion = versioningScheme.GetIncrementVersion(
+                baseVersion,
+                _versionIncrement,
+                latestIncrementCommit);
 
-                    return new AssemblyVersionProperties(latestIncrementVersion);
-                }
-            }
+            using var versionScope = UserMessageScopes.Version(latestIncrementVersion);
+
+            ValidateAssemblyVersion(latestIncrementVersion);
+
+            return new AssemblyVersionProperties(latestIncrementVersion);
         }
 
         private static void ValidateAssemblyVersion(SemanticVersion version)

@@ -10,7 +10,7 @@ namespace Sorrend.Core.OperatingSystem
 {
     public class SystemCommand
     {
-        private string _workingDirectoryPath;
+        private string? _workingDirectoryPath;
 
         public SystemCommand WithWorkingDirectory(string directoryPath)
         {
@@ -35,27 +35,26 @@ namespace Sorrend.Core.OperatingSystem
 
         private async Task<SystemCommandResult> RunProcessAsync(IEnumerable<string> arguments)
         {
-            using (var process = PrepareProcess(arguments))
-            {
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
+            using var process = PrepareProcess(arguments);
 
-                process.EnableRaisingEvents = true;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
 
-                var exitTcs = new TaskCompletionSource<int>();
-                process.Exited += (sender, _) => exitTcs.SetResult(((Process)sender).ExitCode);
+            process.EnableRaisingEvents = true;
 
-                process.Start();
+            var exitTcs = new TaskCompletionSource<int>();
+            process.Exited += (sender, _) => exitTcs.SetResult(((Process)sender).ExitCode);
 
-                var outputTask = process.StandardOutput.ReadToEndAsync();
-                var errorTask = process.StandardError.ReadToEndAsync();
+            process.Start();
 
-                return new SystemCommandResult(
-                    Path.GetFileName(process.StartInfo.FileName),
-                    await exitTcs.Task,
-                    await outputTask,
-                    await errorTask);
-            }
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errorTask = process.StandardError.ReadToEndAsync();
+
+            return new SystemCommandResult(
+                Path.GetFileName(process.StartInfo.FileName),
+                await exitTcs.Task,
+                await outputTask,
+                await errorTask);
         }
 
         private Process PrepareProcess(IEnumerable<string> arguments)

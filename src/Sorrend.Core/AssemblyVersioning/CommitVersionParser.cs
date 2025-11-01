@@ -18,20 +18,19 @@ namespace Sorrend.Core.AssemblyVersioning
 
             foreach (var tag in tags)
             {
-                using (UserMessageScopes.CommitTag(tag))
+                using var commitTagScope = UserMessageScopes.CommitTag(tag);
+
+                if (tag.IsInteger())
                 {
-                    if (tag.IsInteger())
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    var normalizedCommitTag = tag.TrimPrefix("v", StringComparison.OrdinalIgnoreCase);
-                    var candidate = SemanticVersion.ParseOrDefault(normalizedCommitTag);
+                var normalizedCommitTag = tag.TrimPrefix("v", StringComparison.OrdinalIgnoreCase);
+                var candidate = SemanticVersion.ParseOrDefault(normalizedCommitTag);
 
-                    if (candidate != null)
-                    {
-                        candidates.Add(candidate);
-                    }
+                if (candidate != null)
+                {
+                    candidates.Add(candidate);
                 }
             }
 
@@ -47,7 +46,7 @@ namespace Sorrend.Core.AssemblyVersioning
                     CommitHashPreReleaseIdentifierPrefix);
             }
 
-            var identifierHash = identifier.Substring(CommitHashPreReleaseIdentifierPrefix.Length);
+            var identifierHash = identifier[CommitHashPreReleaseIdentifierPrefix.Length..];
             CommitHash.Validate(identifierHash);
 
             if (!commitHash.StartsWith(identifierHash))

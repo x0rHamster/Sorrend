@@ -7,8 +7,8 @@ namespace Sorrend.UnitTests.Scenarios
 {
     public class SemanticVersioningTests
     {
-        private static readonly SemanticVersioningScheme DefaultSemanticVersioningScheme
-            = new SemanticVersioningScheme(new CommitVersionParser());
+        private static readonly SemanticVersioningScheme DefaultSemanticVersioningScheme = new(
+            new CommitVersionParser());
 
         [Theory]
         [InlineData("2.3.4-dev")]
@@ -157,6 +157,6 @@ namespace Sorrend.UnitTests.Scenarios
         }
 
         private static AssemblyVersionCalculation CreateCalculation()
-            => new AssemblyVersionCalculation(DefaultSemanticVersioningScheme);
+            => new(DefaultSemanticVersioningScheme);
     }
 }

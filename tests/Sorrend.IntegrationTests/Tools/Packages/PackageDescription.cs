@@ -12,14 +12,14 @@ namespace Sorrend.IntegrationTests.Tools.Packages
     public class PackageDescription
     {
         private static readonly XNamespace[] NuspecXmlNamespaces =
-        {
+        [
             "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd",
             "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd",
             "http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd",
             "http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd",
             "http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd",
             "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd",
-        };
+        ];
 
         public string Id { get; }
 
@@ -38,7 +38,6 @@ namespace Sorrend.IntegrationTests.Tools.Packages
             IReadOnlyCollection<string> packageFilePathsRelativeToPackage)
         {
             var ns = nuspecXml.Root?.GetDefaultNamespace();
-            Assert.NotNull(ns);
             Assert.Contains(ns, NuspecXmlNamespaces);
 
             var nuspecPackageMetadata = nuspecXml
@@ -59,7 +58,7 @@ namespace Sorrend.IntegrationTests.Tools.Packages
                     .Select(x => x.AttributeOrThrow("id").Value)
                     .Distinct()
                     .ToArray()
-                ?? Array.Empty<string>();
+                ?? [];
 
             BuildProps = FindFile(packageFilePathsRelativeToPackage, $"build/{Id}.props");
             BuildTargets = FindFile(packageFilePathsRelativeToPackage, $"build/{Id}.targets");
@@ -78,35 +77,25 @@ namespace Sorrend.IntegrationTests.Tools.Packages
                 packageFilePathsRelativeToPackage.Contains(filePathRelativeToPackage));
         }
 
-        public class File
+        public class File(
+            PackageDescription package,
+            string filePathRelativeToPackage,
+            bool exists)
         {
-            private readonly PackageDescription _package;
-            private readonly string _filePathRelativeToPackage;
-
-            public bool Exists { get; }
-
-            public File(
-                PackageDescription package,
-                string filePathRelativeToPackage,
-                bool exists)
-            {
-                Exists = exists;
-                _package = package;
-                _filePathRelativeToPackage = filePathRelativeToPackage;
-            }
+            public bool Exists => exists;
 
             public string GetLegacyFilePath(string globalPackagesDirectoryPath)
             {
-                if (!Exists)
+                if (!exists)
                 {
                     throw new InvalidOperationException(
-                        $"The package \"{_package.Id}\" does not contain a file \"{_filePathRelativeToPackage}\".");
+                        $"The package \"{package.Id}\" does not contain a file \"{filePathRelativeToPackage}\".");
                 }
 
                 return Path.Combine(
                     globalPackagesDirectoryPath,
-                    $"{_package.Id}.{_package.Version}",
-                    _filePathRelativeToPackage);
+                    $"{package.Id}.{package.Version}",
+                    filePathRelativeToPackage);
             }
         }
     }

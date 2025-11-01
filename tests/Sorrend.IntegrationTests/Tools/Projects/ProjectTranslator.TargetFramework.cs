@@ -5,36 +5,26 @@ namespace Sorrend.IntegrationTests.Tools.Projects
     public static partial class ProjectTranslator
     {
         public static string GetTargetFrameworkMoniker(TargetFramework targetFramework)
-        {
-            switch (targetFramework)
+            => targetFramework switch
             {
-                case TargetFramework.NetFramework472:
-                    return "net472";
+                TargetFramework.NetFramework472 => "net472",
+                TargetFramework.Net8 => "net8.0",
 
-                case TargetFramework.Net8:
-                    return "net8.0";
-
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(targetFramework),
-                        targetFramework,
-                        null);
-            }
-        }
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(targetFramework),
+                    targetFramework,
+                    null),
+            };
 
         private static string GetTargetFrameworkVersion(TargetFramework targetFramework)
-        {
-            switch (targetFramework)
+            => targetFramework switch
             {
-                case TargetFramework.NetFramework472:
-                    return "v4.7.2";
+                TargetFramework.NetFramework472 => "v4.7.2",
 
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(targetFramework),
-                        targetFramework,
-                        null);
-            }
-        }
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(targetFramework),
+                    targetFramework,
+                    null),
+            };
     }
 }

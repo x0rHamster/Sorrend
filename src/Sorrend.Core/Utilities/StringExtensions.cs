@@ -7,7 +7,7 @@ namespace Sorrend.Core.Utilities
 {
     public static class StringExtensions
     {
-        private static readonly Regex HexNumberRegex = new Regex("^[0-9a-fA-F]+$");
+        private static readonly Regex HexNumberRegex = new("^[0-9a-fA-F]+$");
 
         public static bool IsInteger(this string value)
             => value.TryParseInteger(out _);
@@ -47,7 +47,7 @@ namespace Sorrend.Core.Utilities
             StringComparison comparisonType)
         {
             return value.StartsWith(prefix, comparisonType)
-                ? value.Substring(prefix.Length)
+                ? value[prefix.Length..]
                 : value;
         }
 

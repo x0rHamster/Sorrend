@@ -6,7 +6,7 @@ namespace Sorrend.IntegrationTests.Tools
     public static class VersionAssert
     {
         private static readonly Regex VersionRegex
-            = new Regex(@"^(?<normal>\d+(?:\.\d+)*)(?<prerelease>-[0-9a-zA-Z.\-]+)?(?<build>\+[0-9a-zA-Z.\-]+)?$");
+            = new(@"^(?<normal>\d+(?:\.\d+)*)(?<prerelease>-[0-9a-zA-Z.\-]+)?(?<build>\+[0-9a-zA-Z.\-]+)?$");
 
         public static void NormalVersionEquals(string expected, string actual)
         {

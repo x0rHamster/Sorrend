@@ -10,25 +10,23 @@ namespace Sorrend.IntegrationTests.Tools.Packages
     {
         public Task<PackageDescription> LoadAsync(string filePath)
         {
-            using (var archive = ZipFile.OpenRead(filePath))
-            {
-                var archiveEntryPaths = archive.Entries
-                    .Select(x => x.FullName)
-                    .ToArray();
+            using var archive = ZipFile.OpenRead(filePath);
 
-                var nuspecArchiveEntryIndex = Array.FindIndex(
-                    archiveEntryPaths,
-                    PackageDescription.IsNuspec);
+            var archiveEntryPaths = archive.Entries
+                .Select(x => x.FullName)
+                .ToArray();
 
-                using (var nuspecStream = archive.Entries[nuspecArchiveEntryIndex].Open())
-                {
-                    var package = new PackageDescription(
-                        XDocument.Load(nuspecStream),
-                        archiveEntryPaths);
+            var nuspecArchiveEntryIndex = Array.FindIndex(
+                archiveEntryPaths,
+                PackageDescription.IsNuspec);
 
-                    return Task.FromResult(package);
-                }
-            }
+            using var nuspecStream = archive.Entries[nuspecArchiveEntryIndex].Open();
+
+            var package = new PackageDescription(
+                XDocument.Load(nuspecStream),
+                archiveEntryPaths);
+
+            return Task.FromResult(package);
         }
     }
 }

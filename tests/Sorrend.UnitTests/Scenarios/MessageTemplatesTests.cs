@@ -13,7 +13,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "What do you get if you multiply {Left} by {Right}? {Result}. That's it.",
-                new object[] { 6, 9, 42 },
+                [6, 9, 42],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("What do you get if you multiply 6 by 9? 42. That's it.", result);
@@ -24,7 +24,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{5}, {4}, {1}, {3}, {0} or {2}",
-                new object[] { 23, 15, 42, 16, 8, 4 },
+                [23, 15, 42, 16, 8, 4],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("4, 8, 15, 16, 23 or 42", result);
@@ -35,7 +35,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{5}, {4}, {1}, {3}, {Zero} or {2}",
-                new object[] { 23, 15, 42, 16, 8, 4 },
+                [23, 15, 42, 16, 8, 4],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("23, 15, 42, 16, 8 or 4", result);
@@ -48,7 +48,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 messageTemplate,
-                new object[] { 6, 28, 496, 8128 },
+                [6, 28, 496, 8128],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal(expected, result);
@@ -61,7 +61,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 messageTemplate,
-                new object[] { 220, 284 },
+                [220, 284],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal(expected, result);
@@ -74,7 +74,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 messageTemplate,
-                new object[] { 3, 5, 17, 257 },
+                [3, 5, 17, 257],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal(expected, result);
@@ -85,7 +85,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{First}, {{Escaped}} or {Second}",
-                new object[] { 2, 5, 52 },
+                [2, 5, 52],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("2, {Escaped} or 5", result);
@@ -96,7 +96,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{Bool}, {Real} or {Enum}",
-                new object[] { false, -3.14, DateTimeKind.Utc },
+                [false, -3.14, DateTimeKind.Utc],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("False, -3.14 or Utc", result);
@@ -107,7 +107,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{String} or {Char}",
-                new object[] { "the \\ \"word\"", "e" },
+                ["the \\ \"word\"", "e"],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("\"the \\\\ \\\"word\\\"\" or \"e\"", result);
@@ -118,7 +118,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{Value}",
-                new object[] { null },
+                [null],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("<null>", result);
@@ -129,11 +129,10 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{Formattable} or {OverriddenToString}",
-                new object[]
-                {
+                [
                     new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Unspecified),
                     new ToStringReturns("Towel"),
-                },
+                ],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("12/31/1999 23:59:59 or Towel", result);
@@ -144,13 +143,12 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{MissingToString}, {ToStringReturnsNull}, {ToStringReturnsEmpty} or {ToStringThrows}",
-                new[]
-                {
+                [
                     new object(),
                     new ToStringReturns(null),
                     new ToStringReturns(string.Empty),
                     new ToStringThrows(),
-                },
+                ],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal(
@@ -166,10 +164,9 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{Enumerable}",
-                new object[]
-                {
-                    new object[] { 47, "inflation \\ \"deflation\"", null },
-                },
+                [
+                    new object?[] { 47, "inflation \\ \"deflation\"", null },
+                ],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("[47, \"inflation \\\\ \\\"deflation\\\"\", <null>]", result);
@@ -180,7 +177,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{Real:#0.00%} or {Guid:B}",
-                new object[] { 0.12345, Guid.Parse("382c74c3721d4f3480e557657b6cbc27") },
+                [0.12345, Guid.Parse("382c74c3721d4f3480e557657b6cbc27")],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("12.35% or {382c74c3-721d-4f34-80e5-57657b6cbc27}", result);
@@ -191,7 +188,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{Alignment,8} or {AlignedFormat,-8:X}",
-                new object[] { 142857, 19229 },
+                [142857, 19229],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("  142857 or 4B1D    ", result);
@@ -202,11 +199,10 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{Real} or {Date}",
-                new object[]
-                {
+                [
                     1234.56,
                     new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Unspecified),
-                },
+                ],
                 CultureInfo.GetCultureInfo("es-CO"));
 
             Assert.Equal("1234,56 or 31/12/1999 11:59:59 p. m.", result);
@@ -217,7 +213,7 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{}, {With Space}, {With.Dot}, {With-Hyphen}, {InvalidAlignment,9-}, {EmptyFormat:}, {{LeftEscaped}, {RightEscaped}} or {First}",
-                new object[] { 255 },
+                [255],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal(
@@ -230,22 +226,15 @@ namespace Sorrend.UnitTests.Scenarios
         {
             var result = MessageFormatter.Format(
                 "{-1} or {2}",
-                new object[] { 1980, 2016, 2556 },
+                [1980, 2016, 2556],
                 CultureInfo.InvariantCulture);
 
             Assert.Equal("{-1} or 2556", result);
         }
 
-        private class ToStringReturns
+        private class ToStringReturns(string? value)
         {
-            private readonly string _value;
-
-            public ToStringReturns(string value)
-            {
-                _value = value;
-            }
-
-            public override string ToString() => _value;
+            public override string? ToString() => value;
         }
 
         private class ToStringThrows

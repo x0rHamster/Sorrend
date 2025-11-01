@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace Sorrend.Core.Versions
@@ -65,9 +66,9 @@ namespace Sorrend.Core.Versions
             IReadOnlyList<string> preReleaseIdentifiers,
             string buildMetadataSuffix)
         {
-            ThrowIfNegative(majorVersion, nameof(majorVersion));
-            ThrowIfNegative(minorVersion, nameof(minorVersion));
-            ThrowIfNegative(patchVersion, nameof(patchVersion));
+            ThrowIfNegative(majorVersion);
+            ThrowIfNegative(minorVersion);
+            ThrowIfNegative(patchVersion);
 
             if (majorVersion == 0 && minorVersion == 0 && patchVersion == 0)
             {
@@ -76,7 +77,7 @@ namespace Sorrend.Core.Versions
 
             if (buildMetadataSuffix != string.Empty)
             {
-                ThrowIfDoesNotMatch(StrictBuildMetadataSuffixRegex, buildMetadataSuffix, nameof(buildMetadataSuffix));
+                ThrowIfDoesNotMatch(StrictBuildMetadataSuffixRegex, buildMetadataSuffix);
             }
 
             MajorVersion = majorVersion;
@@ -91,12 +92,12 @@ namespace Sorrend.Core.Versions
         {
             if (preReleaseSuffix == string.Empty)
             {
-                return Array.Empty<string>();
+                return [];
             }
 
-            ThrowIfDoesNotStartWith("-", StringComparison.Ordinal, preReleaseSuffix, nameof(preReleaseSuffix));
+            ThrowIfDoesNotStartWith("-", StringComparison.Ordinal, preReleaseSuffix);
 
-            return preReleaseSuffix.Substring(1).Split('.');
+            return preReleaseSuffix[1..].Split('.');
         }
 
         [SuppressMessage(
@@ -123,7 +124,8 @@ namespace Sorrend.Core.Versions
 
         private static void ThrowIfNegative(
             int argumentValue,
-            string argumentName)
+            [CallerArgumentExpression(nameof(argumentValue))]
+            string argumentName = "")
         {
             if (argumentValue < 0)
             {
@@ -135,7 +137,8 @@ namespace Sorrend.Core.Versions
             string value,
             StringComparison comparisonType,
             string argumentValue,
-            string argumentName)
+            [CallerArgumentExpression(nameof(argumentValue))]
+            string argumentName = "")
         {
             if (!argumentValue.StartsWith(value, comparisonType))
             {
@@ -146,7 +149,8 @@ namespace Sorrend.Core.Versions
         private static void ThrowIfDoesNotMatch(
             Regex regex,
             string argumentValue,
-            string argumentName)
+            [CallerArgumentExpression(nameof(argumentValue))]
+            string argumentName = "")
         {
             if (!regex.IsMatch(argumentValue))
             {

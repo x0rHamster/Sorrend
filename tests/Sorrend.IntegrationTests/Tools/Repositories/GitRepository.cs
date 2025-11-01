@@ -5,18 +5,11 @@ using Sorrend.Core.OperatingSystem;
 
 namespace Sorrend.IntegrationTests.Tools.Repositories
 {
-    public class GitRepository
+    public class GitRepository(string rootDirectoryPath)
     {
         private const int ShortCommitHashLength = 7;
 
-        private readonly string _rootDirectoryPath;
-
-        public GitRepository(string rootDirectoryPath)
-        {
-            _rootDirectoryPath = rootDirectoryPath;
-        }
-
-        public Task<CommitDescription> CommitAsync(Action<CommitSpecification> configure = null)
+        public Task<CommitDescription> CommitAsync(Action<CommitSpecification>? configure = null)
         {
             var specification = new CommitSpecification();
             configure?.Invoke(specification);
@@ -25,7 +18,7 @@ namespace Sorrend.IntegrationTests.Tools.Repositories
 
         private async Task<CommitDescription> CommitAsync(CommitSpecification specification)
         {
-            await RunAsync("git", "add", _rootDirectoryPath);
+            await RunAsync("git", "add", rootDirectoryPath);
 
             var arguments = new List<string>
             {
@@ -41,7 +34,7 @@ namespace Sorrend.IntegrationTests.Tools.Repositories
             }
 
             await new SystemCommand()
-                .WithWorkingDirectory(_rootDirectoryPath)
+                .WithWorkingDirectory(rootDirectoryPath)
                 .RunAsync(arguments);
 
             return await GetHeadCommitAsync();
@@ -72,7 +65,7 @@ namespace Sorrend.IntegrationTests.Tools.Repositories
         private async Task<string> RunAsync(params string[] arguments)
         {
             var result = await new SystemCommand()
-                .WithWorkingDirectory(_rootDirectoryPath)
+                .WithWorkingDirectory(rootDirectoryPath)
                 .RunAsync(arguments);
 
             return result.StandardOutput;

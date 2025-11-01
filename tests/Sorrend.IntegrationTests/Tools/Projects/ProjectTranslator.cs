@@ -44,23 +44,23 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                         .Select(x => PackageReference(x.Id, x.Version, x.DevelopmentDependency))));
 
             XDocument Project(params object[] content)
-                => new XDocument(
+                => new(
                     new XElement(
                         "Project",
                         new XAttribute("Sdk", "Microsoft.NET.Sdk"),
                         content));
 
             XElement PropertyGroup(params object[] properties)
-                => new XElement("PropertyGroup", properties);
+                => new("PropertyGroup", properties);
 
             XElement Property(string name, string value)
-                => new XElement(name, value);
+                => new(name, value);
 
             XElement ItemGroup(params object[] items)
-                => new XElement("ItemGroup", items);
+                => new("ItemGroup", items);
 
             XElement PackageReference(string id, string version, bool developmentDependency)
-                => new XElement(
+                => new(
                     "PackageReference",
                     new XAttribute("Include", id),
                     new XAttribute("Version", version),
@@ -96,18 +96,18 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                     .Select(Import));
 
             XDocument Project(params object[] content)
-                => new XDocument(
+                => new(
                     new XDeclaration(null, null, null),
                     new XElement(ns + "Project", content));
 
             XElement Import(string projectFilePath)
-                => new XElement(ns + "Import", new XAttribute("Project", projectFilePath));
+                => new(ns + "Import", new XAttribute("Project", projectFilePath));
 
             XElement PropertyGroup(params object[] properties)
-                => new XElement(ns + "PropertyGroup", properties);
+                => new(ns + "PropertyGroup", properties);
 
             XElement Property(string name, string value)
-                => new XElement(ns + name, value);
+                => new(ns + name, value);
         }
 
         public static void SetProjectChangeToken(XDocument projectXml, Guid changeToken)
@@ -134,12 +134,12 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                     .Select(x => Package(x.Id, x.Version, x.DevelopmentDependency)));
 
             XDocument Packages(params object[] content)
-                => new XDocument(
+                => new(
                     new XDeclaration(null, null, null),
                     new XElement("packages", content));
 
             XElement Package(string id, string version, bool developmentDependency)
-                => new XElement(
+                => new(
                     "package",
                     new XAttribute("id", id),
                     new XAttribute("version", version),

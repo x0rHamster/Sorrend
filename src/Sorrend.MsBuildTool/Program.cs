@@ -23,35 +23,34 @@ namespace Sorrend.MsBuildTool
             services.AddLogging(x => x.AddMsBuildConsole());
             services.AddSorrendCore();
 
-            using (var provider = services.BuildServiceProvider())
+            await using var provider = services.BuildServiceProvider();
+
+            var logger = provider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger(nameof(Program));
+
+            try
             {
-                var logger = provider
-                    .GetRequiredService<ILoggerFactory>()
-                    .CreateLogger(nameof(Program));
+                var args = Environment.GetCommandLineArgs();
+                var projectFilePath = args[1];
+                var assemblyVersionFilePath = args[2];
 
-                try
-                {
-                    var args = Environment.GetCommandLineArgs();
-                    var projectFilePath = args[1];
-                    var assemblyVersionFilePath = args[2];
-
-                    await provider
-                        .GetRequiredService<ApplicationServices>()
-                        .CalculateAssemblyVersionAsync(
-                            Directory.GetCurrentDirectory(),
-                            projectFilePath,
-                            assemblyVersionFilePath);
-                }
-                catch (UserOrientedException e)
-                {
-                    logger.LogUserOrientedError(e);
-                    Environment.ExitCode = -1;
-                }
-                catch (Exception e)
-                {
-                    logger.LogApplicationCrash(e);
-                    Environment.ExitCode = -1;
-                }
+                await provider
+                    .GetRequiredService<ApplicationServices>()
+                    .CalculateAssemblyVersionAsync(
+                        Directory.GetCurrentDirectory(),
+                        projectFilePath,
+                        assemblyVersionFilePath);
+            }
+            catch (UserOrientedException e)
+            {
+                logger.LogUserOrientedError(e);
+                Environment.ExitCode = -1;
+            }
+            catch (Exception e)
+            {
+                logger.LogApplicationCrash(e);
+                Environment.ExitCode = -1;
             }
         }
     }

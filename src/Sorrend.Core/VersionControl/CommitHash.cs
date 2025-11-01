@@ -34,15 +34,15 @@ namespace Sorrend.Core.VersionControl
         }
 
         public string GetShortHash(int length)
-            => _value.Substring(0, length);
+            => _value[..length];
 
         public bool StartsWith(string prefix)
             => _value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
 
-        public bool Equals(CommitHash other)
+        public bool Equals(CommitHash? other)
             => _value.Equals(other?._value, StringComparison.Ordinal);
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => Equals(obj as CommitHash);
 
         public override int GetHashCode()

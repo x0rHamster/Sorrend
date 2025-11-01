@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using JetBrains.Annotations;
 using Sorrend.Core.UserMessages;
 using Sorrend.Core.Utilities;
 using Sorrend.Core.VersionControl;
@@ -10,25 +9,17 @@ using Sorrend.Core.Versions;
 
 namespace Sorrend.Core.AssemblyVersioning
 {
-    public class SemanticVersioningScheme
+    public class SemanticVersioningScheme(CommitVersionParser commitVersionParser)
     {
         private const int MaximumPreReleaseIdentifierCount = 3;
 
         private const string InitialVersion = "0.1.0-dev.0";
         private const string DefaultPrefixPreReleaseIdentifier = "dev";
 
-        private readonly CommitVersionParser _commitVersionParser;
-
-        public SemanticVersioningScheme(CommitVersionParser commitVersionParser)
-        {
-            _commitVersionParser = commitVersionParser;
-        }
-
         public SemanticVersion GetInitialVersion()
             => SemanticVersion.Parse(InitialVersion);
 
-        [CanBeNull]
-        public SemanticVersion FindBaseVersion(Commit commit)
+        public SemanticVersion? FindBaseVersion(Commit commit)
         {
             var candidates = GetBaseVersionCandidates(commit);
 
@@ -44,7 +35,7 @@ namespace Sorrend.Core.AssemblyVersioning
         }
 
         private IReadOnlyCollection<SemanticVersion> GetBaseVersionCandidates(Commit commit)
-            => _commitVersionParser.ParseTags(commit.Tags);
+            => commitVersionParser.ParseTags(commit.Tags);
 
         private static SemanticVersion GetSingleBaseVersion(IReadOnlyCollection<SemanticVersion> candidates)
             => candidates.Count > 1
@@ -81,7 +72,7 @@ namespace Sorrend.Core.AssemblyVersioning
         {
             if (version.PreReleaseIdentifiers.TryGetValue(index: 2, out var commitHashIdentifier))
             {
-                _commitVersionParser.ValidateHashPreReleaseIdentifier(commitHashIdentifier, commit.Hash);
+                commitVersionParser.ValidateHashPreReleaseIdentifier(commitHashIdentifier, commit.Hash);
             }
         }
 
@@ -132,18 +123,17 @@ namespace Sorrend.Core.AssemblyVersioning
                     "The version increment returned a pre-release prefix, but cannot return a pre-release counter. Please report a bug.");
 
             var incrementCommitHashPreReleaseIdentifier =
-                _commitVersionParser.GetHashPreReleaseIdentifier(incrementCommitHash);
+                commitVersionParser.GetHashPreReleaseIdentifier(incrementCommitHash);
 
             return new SemanticVersion(
                 incrementMajorVersion,
                 incrementMinorVersion,
                 incrementPatchVersion,
-                new[]
-                {
+                [
                     incrementPrefixPreReleaseIdentifier,
                     incrementCounterPreReleaseIdentifier.ToString(CultureInfo.InvariantCulture),
                     incrementCommitHashPreReleaseIdentifier,
-                },
+                ],
                 string.Empty);
         }
     }

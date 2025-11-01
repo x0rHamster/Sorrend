@@ -7,22 +7,11 @@ using Sorrend.Core.VersionControl;
 
 namespace Sorrend.Core
 {
-    public class ApplicationServices
+    public class ApplicationServices(
+        RepositoryLocator repositoryLocator,
+        AssemblyVersionCalculationFactory assemblyVersionCalculationFactory,
+        AssemblyVersionSerializer assemblyVersionSerializer)
     {
-        private readonly RepositoryLocator _repositoryLocator;
-        private readonly AssemblyVersionCalculationFactory _assemblyVersionCalculationFactory;
-        private readonly AssemblyVersionSerializer _assemblyVersionSerializer;
-
-        public ApplicationServices(
-            RepositoryLocator repositoryLocator,
-            AssemblyVersionCalculationFactory assemblyVersionCalculationFactory,
-            AssemblyVersionSerializer assemblyVersionSerializer)
-        {
-            _repositoryLocator = repositoryLocator;
-            _assemblyVersionCalculationFactory = assemblyVersionCalculationFactory;
-            _assemblyVersionSerializer = assemblyVersionSerializer;
-        }
-
         public async Task CalculateAssemblyVersionAsync(
             string workingDirectoryPath,
             string projectFilePathRelativeToWorkingDirectory,
@@ -43,27 +32,26 @@ namespace Sorrend.Core
                     projectDirectoryPath,
                     assemblyVersionFilePathRelativeToProject));
 
-            var calculation = _assemblyVersionCalculationFactory.Create();
+            var calculation = assemblyVersionCalculationFactory.Create();
 
-            var repository = await _repositoryLocator.GetAsync(projectDirectoryPath);
+            var repository = await repositoryLocator.GetAsync(projectDirectoryPath);
             var commits = await repository.GetFirstParentCommitsAsync();
 
             foreach (var commit in commits)
             {
-                using (UserMessageScopes.Commit(commit))
-                {
-                    calculation.Add(commit);
+                using var commitScope = UserMessageScopes.Commit(commit);
 
-                    if (calculation.HasResult)
-                    {
-                        break;
-                    }
+                calculation.Add(commit);
+
+                if (calculation.HasResult)
+                {
+                    break;
                 }
             }
 
             var assemblyVersion = calculation.GetResult();
 
-            var assemblyVersionBytes = _assemblyVersionSerializer.Serialize(assemblyVersion);
+            var assemblyVersionBytes = assemblyVersionSerializer.Serialize(assemblyVersion);
             File.WriteAllBytes(assemblyVersionFilePath, assemblyVersionBytes);
         }
     }

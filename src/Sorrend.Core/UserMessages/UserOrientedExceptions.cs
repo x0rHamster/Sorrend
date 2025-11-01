@@ -104,7 +104,7 @@ namespace Sorrend.Core.UserMessages
             Justification = "The caller must provide a constant value that will be forwarded unchanged")]
         private static Exception Create(
             [StructuredMessageTemplate] string messageTemplate,
-            params object[] arguments)
+            params object?[] arguments)
         {
             return UserOrientedExceptionFactory.CreateScoped(
                 CultureInfo.InvariantCulture,

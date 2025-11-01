@@ -6,20 +6,11 @@ using Sorrend.IntegrationTests.Tools.Packages;
 
 namespace Sorrend.IntegrationTests.Tools.Projects
 {
-    public class ProjectFactory
+    public class ProjectFactory(
+        TestingEnvironment.Provider testingEnvironmentProvider,
+        PackageManager.Provider packageManagerProvider)
     {
-        private readonly TestingEnvironment.Provider _testingEnvironmentProvider;
-        private readonly PackageManager.Provider _packageManagerProvider;
-
-        public ProjectFactory(
-            TestingEnvironment.Provider testingEnvironmentProvider,
-            PackageManager.Provider packageManagerProvider)
-        {
-            _testingEnvironmentProvider = testingEnvironmentProvider;
-            _packageManagerProvider = packageManagerProvider;
-        }
-
-        public Task<ProjectDescription> CreateAsync(Action<ProjectSpecification> configure = null)
+        public Task<ProjectDescription> CreateAsync(Action<ProjectSpecification>? configure = null)
         {
             var specification = new ProjectSpecification();
             configure?.Invoke(specification);
@@ -34,8 +25,8 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                     "The project has multiple target frameworks, but it is not SDK-style and does not support multitargeting.");
             }
 
-            var testingEnvironment = await _testingEnvironmentProvider.GetAsync();
-            var packageManager = await _packageManagerProvider.GetAsync();
+            var testingEnvironment = await testingEnvironmentProvider.GetAsync();
+            var packageManager = await packageManagerProvider.GetAsync();
 
             var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
 

@@ -8,7 +8,7 @@ namespace Sorrend.IntegrationTests.Tools.Projects
     public class ProjectDescription
     {
         public string DirectoryPath
-            => Path.GetDirectoryName(FilePath);
+            => Path.GetDirectoryName(FilePath)!;
 
         public string FilePath { get; }
 
@@ -35,7 +35,7 @@ namespace Sorrend.IntegrationTests.Tools.Projects
         {
             var targetFrameworks = specification.TargetFrameworks.Any()
                 ? specification.TargetFrameworks.AsEnumerable()
-                : new[] { specification.EffectiveTargetFramework };
+                : [specification.EffectiveTargetFramework];
 
             var targetFrameworkMonikers = targetFrameworks
                 .Select(ProjectTranslator.GetTargetFrameworkMoniker)

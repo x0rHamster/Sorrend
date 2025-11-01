@@ -4,18 +4,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 
 namespace Sorrend.Core.Utilities.MessageTemplates
 {
     public static class MessageFormatter
     {
         private static readonly Regex PlaceholderRegex
-            = new Regex(@"(?<!\{)\{([0-9a-zA-Z_]+(?:,-?\d+)?(?::[^\}]+)?)\}(?!\})");
+            = new(@"(?<!\{)\{([0-9a-zA-Z_]+(?:,-?\d+)?(?::[^\}]+)?)\}(?!\})");
 
         public static string Format(
             string messageTemplate,
-            [ItemCanBeNull] object[] arguments,
+            object?[] arguments,
             IFormatProvider formatProvider)
         {
             var tokens = Tokenize(messageTemplate);
@@ -25,7 +24,7 @@ namespace Sorrend.Core.Utilities.MessageTemplates
 
         private static string Format(
             IEnumerable<IToken> tokens,
-            object[] arguments,
+            object?[] arguments,
             IFormatProvider formatProvider)
         {
             var builder = new StringBuilder();
@@ -40,9 +39,9 @@ namespace Sorrend.Core.Utilities.MessageTemplates
 
         private static IToken[] Tokenize(string messageTemplate)
             => PlaceholderRegex.Split(messageTemplate)
-                .Select(
+                .Select<string, IToken>(
                     (x, i) => IsEven(i)
-                        ? (IToken)new TextToken(x)
+                        ? new TextToken(x)
                         : new PlaceholderToken(x))
                 .ToArray();
 

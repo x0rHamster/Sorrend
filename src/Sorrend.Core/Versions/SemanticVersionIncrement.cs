@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Sorrend.Core.UserMessages;
 
 namespace Sorrend.Core.Versions
@@ -87,10 +86,9 @@ namespace Sorrend.Core.Versions
             }
         }
 
-        [CanBeNull]
-        public string GetPrefixPreReleaseIdentifier(
+        public string? GetPrefixPreReleaseIdentifier(
             SemanticVersion currentVersion,
-            [CanBeNull] string currentValue,
+            string? currentValue,
             string defaultValue)
         {
             if (HasPreReleases)
@@ -119,7 +117,7 @@ namespace Sorrend.Core.Versions
 
                 if (currentVersion.IsPreRelease)
                 {
-                    targetValue = targetValue ?? 1;
+                    targetValue ??= 1;
                 }
 
                 if (HasReleases)
@@ -134,7 +132,7 @@ namespace Sorrend.Core.Versions
 
                 if (_counterPreReleaseIdentifierIncrement > 0)
                 {
-                    targetValue = targetValue ?? 0;
+                    targetValue ??= 0;
 
                     checked
                     {

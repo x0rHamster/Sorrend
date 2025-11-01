@@ -13,7 +13,7 @@ namespace Sorrend.Core.Utilities.MessageTemplates
 
         private readonly string _name;
         private readonly int _alignment;
-        private readonly string _format;
+        private readonly string? _format;
 
         private int _index;
 
@@ -26,15 +26,15 @@ namespace Sorrend.Core.Utilities.MessageTemplates
             var formatIndex = _name.IndexOf(':');
             if (formatIndex != -1)
             {
-                _format = _name.Substring(formatIndex + 1);
-                _name = _name.Substring(0, formatIndex);
+                _format = _name[(formatIndex + 1)..];
+                _name = _name[..formatIndex];
             }
 
             var alignmentIndex = _name.IndexOf(',');
             if (alignmentIndex != -1)
             {
-                _alignment = _name.Substring(alignmentIndex + 1).ParseInteger();
-                _name = _name.Substring(0, alignmentIndex);
+                _alignment = _name[(alignmentIndex + 1)..].ParseInteger();
+                _name = _name[..alignmentIndex];
             }
 
             if (!_name.TryParseInteger(out _index))
@@ -72,7 +72,7 @@ namespace Sorrend.Core.Utilities.MessageTemplates
 
         public void WriteTo(
             StringBuilder builder,
-            object[] arguments,
+            object?[] arguments,
             IFormatProvider formatProvider)
         {
             if (_index >= arguments.Length)
@@ -99,39 +99,24 @@ namespace Sorrend.Core.Utilities.MessageTemplates
             }
         }
 
-        private static string FormatValue(string format, object argument, IFormatProvider formatProvider)
+        private static string FormatValue(string? format, object? argument, IFormatProvider formatProvider)
         {
-            var formatter = (ICustomFormatter)formatProvider.GetFormat(typeof(ICustomFormatter));
+            var formatter = (ICustomFormatter?)formatProvider.GetFormat(typeof(ICustomFormatter));
             if (formatter != null)
             {
                 return formatter.Format(format, argument, formatProvider);
             }
 
-            string formatted;
-            switch (argument)
+            var formatted = argument switch
             {
-                case null:
-                    formatted = "<null>";
-                    break;
+                null => "<null>",
+                IFormattable formattable => formattable.ToString(format, formatProvider),
+                string str => str,
+                IEnumerable enumerable => FormatEnumerable(enumerable, formatProvider),
+                _ => ToStringOrDefault(argument, argument.GetType().ToString()),
+            };
 
-                case IFormattable formattable:
-                    formatted = formattable.ToString(format, formatProvider);
-                    break;
-
-                case string str:
-                    formatted = str;
-                    break;
-
-                case IEnumerable enumerable:
-                    formatted = FormatEnumerable(enumerable, formatProvider);
-                    break;
-
-                default:
-                    formatted = ToStringOrDefault(argument, argument.GetType().ToString());
-                    break;
-            }
-
-            if (argument is string || argument is char)
+            if (argument is string or char)
             {
                 formatted = Quote(formatted);
             }

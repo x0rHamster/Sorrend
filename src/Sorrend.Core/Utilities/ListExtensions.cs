@@ -12,11 +12,11 @@ namespace Sorrend.Core.Utilities
                 return true;
             }
 
-            value = default;
+            value = default!;
             return false;
         }
 
-        public static T GetValueOrDefault<T>(this IReadOnlyList<T> source, int index)
+        public static T? GetValueOrDefault<T>(this IReadOnlyList<T> source, int index)
         {
             return index < source.Count
                 ? source[index]

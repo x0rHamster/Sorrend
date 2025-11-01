@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using JetBrains.Annotations;
 
 namespace Sorrend.Core.Utilities.MessageTemplates
 {
@@ -8,7 +7,7 @@ namespace Sorrend.Core.Utilities.MessageTemplates
     {
         void WriteTo(
             StringBuilder builder,
-            [ItemCanBeNull] object[] arguments,
+            object?[] arguments,
             IFormatProvider formatProvider);
     }
 }

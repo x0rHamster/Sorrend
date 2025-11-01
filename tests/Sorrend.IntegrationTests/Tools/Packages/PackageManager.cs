@@ -11,7 +11,7 @@ namespace Sorrend.IntegrationTests.Tools.Packages
         private readonly PackageAnalyzer _packageAnalyzer;
         private readonly string _packageSourceDirectoryPath;
 
-        private PackageDescription _initializedPackageUnderTest;
+        private PackageDescription? _initializedPackageUnderTest;
 
         public string GlobalPackagesDirectoryPath { get; }
 
@@ -43,22 +43,14 @@ namespace Sorrend.IntegrationTests.Tools.Packages
             return await _packageAnalyzer.LoadAsync(filePath);
         }
 
-        public class Provider : AsyncInitializingProvider<PackageManager>
+        public class Provider(
+            TestingEnvironment.Provider testingEnvironmentProvider,
+            PackageAnalyzer packageAnalyzer)
+            : AsyncInitializingProvider<PackageManager>
         {
-            private readonly TestingEnvironment.Provider _testingEnvironmentProvider;
-            private readonly PackageAnalyzer _packageAnalyzer;
-
-            public Provider(
-                TestingEnvironment.Provider testingEnvironmentProvider,
-                PackageAnalyzer packageAnalyzer)
-            {
-                _testingEnvironmentProvider = testingEnvironmentProvider;
-                _packageAnalyzer = packageAnalyzer;
-            }
-
             protected override async Task<PackageManager> CreateInitializedAsync()
             {
-                var testingEnvironment = await _testingEnvironmentProvider.GetAsync();
+                var testingEnvironment = await testingEnvironmentProvider.GetAsync();
 
                 var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
                 var packageSourceDirectoryPath = Path.Combine(workingDirectoryPath, "PackageSource");
@@ -70,7 +62,7 @@ namespace Sorrend.IntegrationTests.Tools.Packages
                     globalPackagesDirectoryPath);
 
                 var instance = new PackageManager(
-                    _packageAnalyzer,
+                    packageAnalyzer,
                     packageSourceDirectoryPath,
                     globalPackagesDirectoryPath);
 

@@ -11,33 +11,25 @@ namespace Sorrend.IntegrationTests.Tools.Projects
 
         public bool? SdkStyle { get; set; }
 
-        public List<TargetFramework> TargetFrameworks { get; } = new List<TargetFramework>();
+        public List<TargetFramework> TargetFrameworks { get; } = [];
 
-        public List<PackageDescription> PackageReferences { get; } = new List<PackageDescription>();
+        public List<PackageDescription> PackageReferences { get; } = [];
 
         public bool EffectiveSdkStyle
             => SdkStyle ?? true;
 
         public TargetFramework EffectiveTargetFramework
-        {
-            get
+            => TargetFrameworks.Count switch
             {
-                if (TargetFrameworks.Count > 1)
-                {
-                    throw new InvalidOperationException(
-                        $"The property \"{nameof(TargetFrameworks)}\" contains multiple values, use it instead.");
-                }
+                > 1 => throw new InvalidOperationException(
+                    $"The property \"{nameof(TargetFrameworks)}\" contains multiple values, use it instead."),
 
-                if (TargetFrameworks.Count == 1)
-                {
-                    return TargetFrameworks[0];
-                }
+                1 => TargetFrameworks[0],
 
-                return EffectiveSdkStyle
+                _ => EffectiveSdkStyle
                     ? TargetFramework.Net8
-                    : TargetFramework.NetFramework472;
-            }
-        }
+                    : TargetFramework.NetFramework472,
+            };
 
         public ProjectSpecification WithSdkStyle(bool sdkStyle = true)
         {

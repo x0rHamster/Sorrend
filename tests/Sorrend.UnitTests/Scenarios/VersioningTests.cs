@@ -9,14 +9,14 @@ namespace Sorrend.UnitTests.Scenarios
     public partial class VersioningTests
     {
         private static readonly Func<string, string>[] NormalVersionIdentifierPlacements =
-        {
+        [
             identifier => $"2.3.{identifier}",
             identifier => $"2.{identifier}.4",
             identifier => $"{identifier}.3.4",
-        };
+        ];
 
-        private static readonly SemanticVersioningScheme DefaultVersioningScheme
-            = new SemanticVersioningScheme(new CommitVersionParser());
+        private static readonly SemanticVersioningScheme DefaultVersioningScheme = new(
+            new CommitVersionParser());
 
         [Theory]
         [InlineData("2.3.4")]
@@ -193,7 +193,7 @@ namespace Sorrend.UnitTests.Scenarios
         [Fact]
         public void RejectsMultipleBaseVersionsInSingleCommit()
         {
-            var commit = Generate.Commit(tags: new[] { "2.3.4", "3.4.5" });
+            var commit = Generate.Commit(tags: ["2.3.4", "3.4.5"]);
             var calculation = CreateCalculation();
 
             Assert.ThrowsAny<UserOrientedException>(
@@ -217,6 +217,6 @@ namespace Sorrend.UnitTests.Scenarios
         }
 
         private static AssemblyVersionCalculation CreateCalculation()
-            => new AssemblyVersionCalculation(DefaultVersioningScheme);
+            => new(DefaultVersioningScheme);
     }
 }

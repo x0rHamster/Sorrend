@@ -9,18 +9,13 @@ using Sorrend.Core.Utilities.MessageTemplates;
 
 namespace Sorrend.MsBuildTool.Logging
 {
-    internal class MsBuildConsoleFormatter : ConsoleFormatter
+    internal class MsBuildConsoleFormatter() : ConsoleFormatter(FormatterName)
     {
         public const string FormatterName = "msbuild";
 
-        public MsBuildConsoleFormatter()
-            : base(FormatterName)
-        {
-        }
-
         public override void Write<TState>(
             in LogEntry<TState> logEntry,
-            IExternalScopeProvider scopeProvider,
+            IExternalScopeProvider? scopeProvider,
             TextWriter textWriter)
         {
             textWriter.Write(nameof(Sorrend));
@@ -48,8 +43,8 @@ namespace Sorrend.MsBuildTool.Logging
             IFormatProvider formatProvider)
         {
             if (
-                logEntry.State is IReadOnlyList<KeyValuePair<string, object>> items
-                && items[items.Count - 1].Value is string messageTemplate)
+                logEntry.State is IReadOnlyList<KeyValuePair<string, object?>> items
+                && items[^1].Value is string messageTemplate)
             {
                 var arguments = items
                     .Take(items.Count - 1)

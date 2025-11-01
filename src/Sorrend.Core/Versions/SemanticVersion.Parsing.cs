@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 using Sorrend.Core.UserMessages;
 using Sorrend.Core.Utilities;
 
@@ -10,10 +9,10 @@ namespace Sorrend.Core.Versions
         private const int MaximumNormalVersionIdentifierCount = 3;
 
         private static readonly Regex StrictPreReleaseIdentifierRegex
-            = new Regex(@"(?:0|[1-9]\d*|\d*[a-zA-Z\-][0-9a-zA-Z\-]*)");
+            = new(@"(?:0|[1-9]\d*|\d*[a-zA-Z\-][0-9a-zA-Z\-]*)");
 
         private static readonly Regex StrictBuildMetadataIdentifierRegex
-            = new Regex(@"[0-9a-zA-Z\-]+");
+            = new(@"[0-9a-zA-Z\-]+");
 
         private static readonly Regex StrictPreReleaseSuffixRegex
             = @"^-{0}(?:\.{0})*$".FormatRegex(StrictPreReleaseIdentifierRegex);
@@ -27,8 +26,7 @@ namespace Sorrend.Core.Versions
                 @"-[0-9a-zA-Z.\-]+",
                 @"\+[0-9a-zA-Z.\-]+");
 
-        [CanBeNull]
-        public static SemanticVersion ParseOrDefault(string version)
+        public static SemanticVersion? ParseOrDefault(string version)
         {
             var match = LooseVersionRegex.Match(version);
             if (!match.Success)

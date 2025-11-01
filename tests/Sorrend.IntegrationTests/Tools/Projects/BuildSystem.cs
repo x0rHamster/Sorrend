@@ -10,9 +10,9 @@ namespace Sorrend.IntegrationTests.Tools.Projects
 {
     public class BuildSystem
     {
-        private readonly string _msbuildExecutablePath;
+        private readonly string? _msbuildExecutablePath;
 
-        private BuildSystem(string msbuildExecutablePath)
+        private BuildSystem(string? msbuildExecutablePath)
         {
             _msbuildExecutablePath = msbuildExecutablePath;
         }
@@ -134,7 +134,7 @@ namespace Sorrend.IntegrationTests.Tools.Projects
                 return new BuildSystem(msbuildExecutablePath);
             }
 
-            private static Task<string> ResolveToolboxRiderMsBuildExecutablePathAsync()
+            private static Task<string?> ResolveToolboxRiderMsBuildExecutablePathAsync()
             {
                 var riderScriptFilePath =
                     Environment.ExpandEnvironmentVariables(
@@ -142,21 +142,21 @@ namespace Sorrend.IntegrationTests.Tools.Projects
 
                 if (!File.Exists(riderScriptFilePath))
                 {
-                    return Task.FromResult<string>(null);
+                    return Task.FromResult<string?>(null);
                 }
 
                 var riderScriptText = File.ReadAllText(riderScriptFilePath);
                 var riderDirectoryPathMatch = Regex.Match(riderScriptText, @"\s([^\s]+?)\\bin\\rider64.exe\b");
                 if (!riderDirectoryPathMatch.Success)
                 {
-                    return Task.FromResult<string>(null);
+                    return Task.FromResult<string?>(null);
                 }
 
                 var result = Path.Combine(
                     riderDirectoryPathMatch.Groups[1].Value,
                     "tools/MSBuild/Current/Bin/MSBuild.exe");
 
-                return Task.FromResult(result);
+                return Task.FromResult<string?>(result);
             }
         }
     }

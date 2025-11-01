@@ -11,21 +11,21 @@ namespace Sorrend.UnitTests.Tools
             => Guid.NewGuid().ToString("N");
 
         public static Commit Commit(
-            string hash = null,
-            string date = null,
-            string tag = null,
-            IReadOnlyCollection<string> tags = null)
+            string? hash = null,
+            string? date = null,
+            string? tag = null,
+            IReadOnlyCollection<string>? tags = null)
         {
-            hash = hash ?? CommitHash();
+            hash ??= CommitHash();
 
-            date = date ?? "1999-12-31T23:59:59-08:00";
+            date ??= "1999-12-31T23:59:59-08:00";
 
             if (tag != null)
             {
-                tags = tags ?? new[] { tag };
+                tags ??= [tag];
             }
 
-            tags = tags ?? Array.Empty<string>();
+            tags ??= [];
 
             return new Commit(
                 new CommitHash(hash),

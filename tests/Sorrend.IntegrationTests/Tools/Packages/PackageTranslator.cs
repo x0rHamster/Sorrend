@@ -18,7 +18,7 @@ namespace Sorrend.IntegrationTests.Tools.Packages
                     Item("local", packageSourceDirectoryPath)));
 
             XDocument Configuration(params object[] sections)
-                => new XDocument(
+                => new(
                     new XDeclaration(null, null, null),
                     new XElement("configuration", sections));
 
@@ -31,7 +31,7 @@ namespace Sorrend.IntegrationTests.Tools.Packages
             }
 
             XElement Item(string key, string value)
-                => new XElement(
+                => new(
                     "add",
                     new XAttribute("key", key),
                     new XAttribute("value", value));

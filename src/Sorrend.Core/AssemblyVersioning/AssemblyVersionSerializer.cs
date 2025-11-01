@@ -10,7 +10,7 @@ namespace Sorrend.Core.AssemblyVersioning
 {
     public class AssemblyVersionSerializer
     {
-        private static readonly XmlWriterSettings XmlWriterSettings = new XmlWriterSettings
+        private static readonly XmlWriterSettings XmlWriterSettings = new()
         {
             Encoding = new UTF8Encoding(),
             Indent = true,
@@ -41,25 +41,25 @@ namespace Sorrend.Core.AssemblyVersioning
             return Serialize(document);
 
             XDocument AssemblyVersion(params object[] content)
-                => new XDocument(
+                => new(
                     new XDeclaration(null, null, null),
                     new XElement(ns + "AssemblyVersion", content));
 
             XElement ProjectProperties(params object[] content)
-                => new XElement(ns + "ProjectProperties", content);
+                => new(ns + "ProjectProperties", content);
 
             XElement ProjectProperty(string name, object value)
-                => new XElement(
+                => new(
                     ns + "ProjectProperty",
                     new XAttribute("Name", name),
                     new XAttribute("Value", value.ToString()));
 
             XElement AssemblyAttributes(params object[] content)
-                => new XElement(ns + "AssemblyAttributes", content);
+                => new(ns + "AssemblyAttributes", content);
 
             XElement AssemblyAttribute<T>(string parameter1)
                 where T : Attribute
-                => new XElement(
+                => new(
                     ns + "AssemblyAttribute",
                     new XAttribute("TypeName", ReflectionHelper.GetTypeName<T>()),
                     new XAttribute("Parameter1", parameter1));
@@ -67,15 +67,14 @@ namespace Sorrend.Core.AssemblyVersioning
 
         private static byte[] Serialize(XDocument document)
         {
-            using (var stream = new MemoryStream())
-            {
-                using (var writer = XmlWriter.Create(stream, XmlWriterSettings))
-                {
-                    document.WriteTo(writer);
-                }
+            using var stream = new MemoryStream();
 
-                return stream.ToArray();
+            using (var writer = XmlWriter.Create(stream, XmlWriterSettings))
+            {
+                document.WriteTo(writer);
             }
+
+            return stream.ToArray();
         }
     }
 }

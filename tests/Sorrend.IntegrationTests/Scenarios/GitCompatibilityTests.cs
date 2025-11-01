@@ -10,26 +10,15 @@ using Xunit;
 
 namespace Sorrend.IntegrationTests.Scenarios
 {
-    public class GitCompatibilityTests
+    public class GitCompatibilityTests(
+        TestingEnvironment.Provider testingEnvironmentProvider,
+        GitRepositoryFactory gitRepositoryFactory,
+        HeadlessSut headlessSut)
     {
-        private readonly TestingEnvironment.Provider _testingEnvironmentProvider;
-        private readonly GitRepositoryFactory _gitRepositoryFactory;
-        private readonly HeadlessSut _headlessSut;
-
-        public GitCompatibilityTests(
-            TestingEnvironment.Provider testingEnvironmentProvider,
-            GitRepositoryFactory gitRepositoryFactory,
-            HeadlessSut headlessSut)
-        {
-            _testingEnvironmentProvider = testingEnvironmentProvider;
-            _gitRepositoryFactory = gitRepositoryFactory;
-            _headlessSut = headlessSut;
-        }
-
         [Fact]
         public async Task GetsCommitHistory()
         {
-            var testingEnvironment = await _testingEnvironmentProvider.GetAsync();
+            var testingEnvironment = await testingEnvironmentProvider.GetAsync();
             var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
 
             var repositoryRootDirectoryPath = Path.Combine(workingDirectoryPath, Generate.DirectoryName());
@@ -37,7 +26,7 @@ namespace Sorrend.IntegrationTests.Scenarios
 
             var expectedCommits = new List<CommitDescription>();
 
-            var repository = await _gitRepositoryFactory.CreateAsync(repositoryRootDirectoryPath);
+            var repository = await gitRepositoryFactory.CreateAsync(repositoryRootDirectoryPath);
 
             expectedCommits.Add(await repository.CommitAsync());
 
@@ -64,7 +53,7 @@ namespace Sorrend.IntegrationTests.Scenarios
 
             expectedCommits.Reverse();
 
-            var actualCommits = await _headlessSut.GitVersionControlSystem
+            var actualCommits = await headlessSut.GitVersionControlSystem
                 .GetFirstParentCommitsAsync(repositoryRootDirectoryPath);
 
             Assert.Equal(

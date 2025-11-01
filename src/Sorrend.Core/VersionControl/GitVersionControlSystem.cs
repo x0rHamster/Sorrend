@@ -10,10 +10,10 @@ namespace Sorrend.Core.VersionControl
 {
     public class GitVersionControlSystem
     {
-        private static readonly Regex LogCommitSeparatorRegex = new Regex(@"(?<=\x00)\x00");
-        private static readonly Regex LogCommitPartSeparatorRegex = new Regex(@"\n\x00(?:\n|$)");
-        private static readonly Regex LogCommitFieldSeparatorRegex = new Regex(@"\n");
-        private static readonly Regex LogCommitTagSeparatorRegex = new Regex("(?:^|, )tag: ");
+        private static readonly Regex LogCommitSeparatorRegex = new(@"(?<=\x00)\x00");
+        private static readonly Regex LogCommitPartSeparatorRegex = new(@"\n\x00(?:\n|$)");
+        private static readonly Regex LogCommitFieldSeparatorRegex = new(@"\n");
+        private static readonly Regex LogCommitTagSeparatorRegex = new("(?:^|, )tag: ");
 
         public async Task<string> GetRepositoryRootDirectoryPathAsync(string repositoryRelatedDirectoryPath)
         {

@@ -19,7 +19,7 @@ namespace Sorrend.IntegrationTests.Tools
 
         private TestingEnvironment()
         {
-            TestAssemblyDirectoryPath = Path.GetDirectoryName(GetType().Assembly.Location);
+            TestAssemblyDirectoryPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
 
             WorkingDirectoryPath = Path.Combine(
                 Path.GetTempPath(),

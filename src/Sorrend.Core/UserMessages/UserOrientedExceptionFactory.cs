@@ -8,12 +8,12 @@ namespace Sorrend.Core.UserMessages
 {
     public static class UserOrientedExceptionFactory
     {
-        private static readonly AsyncLocal<Scope> CurrentScope = new AsyncLocal<Scope>();
+        private static readonly AsyncLocal<Scope?> CurrentScope = new();
 
         public static UserOrientedException CreateScoped(
             IFormatProvider formatProvider,
             [StructuredMessageTemplate] string messageTemplate,
-            [ItemCanBeNull] params object[] arguments)
+            params object?[] arguments)
         {
             return new UserOrientedException(
                 formatProvider,
@@ -25,7 +25,7 @@ namespace Sorrend.Core.UserMessages
             Exception innerException,
             IFormatProvider formatProvider,
             string messageTemplate,
-            [ItemCanBeNull] params object[] arguments)
+            params object?[] arguments)
         {
             return new UserOrientedException(
                 innerException,
@@ -38,7 +38,7 @@ namespace Sorrend.Core.UserMessages
         {
             var result = new StringBuilder(messageTemplate);
 
-            if (result[result.Length - 1] != '.')
+            if (result[^1] != '.')
             {
                 result.Append('.');
             }
@@ -63,7 +63,7 @@ namespace Sorrend.Core.UserMessages
 
                 result.Append(scope.MessageTemplate);
 
-                if (result[result.Length - 1] != '.')
+                if (result[^1] != '.')
                 {
                     result.Append('.');
                 }
@@ -74,9 +74,9 @@ namespace Sorrend.Core.UserMessages
             return result.ToString();
         }
 
-        private static object[] IncludeScopeArguments(IEnumerable<object> arguments)
+        private static object?[] IncludeScopeArguments(IEnumerable<object?> arguments)
         {
-            var result = new List<object>(arguments);
+            var result = new List<object?>(arguments);
 
             for (
                 var scope = CurrentScope.Value;
@@ -91,25 +91,14 @@ namespace Sorrend.Core.UserMessages
 
         public static IDisposable BeginScope(
             [StructuredMessageTemplate] string messageTemplate,
-            [ItemCanBeNull] params object[] arguments)
+            params object?[] arguments)
         {
             return new Scope(messageTemplate, arguments);
         }
 
-        private sealed class Scope : IDisposable
+        private sealed record Scope(string MessageTemplate, object?[] Arguments) : IDisposable
         {
-            public string MessageTemplate { get; }
-
-            public object[] Arguments { get; }
-
-            [CanBeNull]
-            public Scope Parent { get; } = CurrentScope.Value;
-
-            public Scope(string messageTemplate, [ItemCanBeNull] object[] arguments)
-            {
-                MessageTemplate = messageTemplate;
-                Arguments = arguments;
-            }
+            public Scope? Parent { get; } = CurrentScope.Value;
 
             public void Dispose()
             {

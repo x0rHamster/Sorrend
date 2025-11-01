@@ -15,13 +15,12 @@ namespace Sorrend.IntegrationTests.Tools.Assemblies
                     RuntimeEnvironment.GetRuntimeDirectory(),
                     "*.dll"));
 
-            using (var context = new MetadataLoadContext(resolver))
-            {
-                var assembly = context.LoadFromAssemblyPath(filePath);
-                var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
+            using var context = new MetadataLoadContext(resolver);
 
-                return Task.FromResult(new AssemblyDescription(assembly, fileVersionInfo));
-            }
+            var assembly = context.LoadFromAssemblyPath(filePath);
+            var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
+
+            return Task.FromResult(new AssemblyDescription(assembly, fileVersionInfo));
         }
     }
 }

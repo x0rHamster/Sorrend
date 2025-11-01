@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using JetBrains.Annotations;
 using Sorrend.Core.Utilities.MessageTemplates;
 
 namespace Sorrend.Core.UserMessages
@@ -15,8 +14,7 @@ namespace Sorrend.Core.UserMessages
     {
         public string MessageTemplate { get; } = string.Empty;
 
-        [ItemCanBeNull]
-        public IReadOnlyList<object> Arguments { get; } = Array.Empty<object>();
+        public IReadOnlyList<object?> Arguments { get; } = [];
 
         public IFormatProvider FormatProvider { get; } = CultureInfo.CurrentCulture;
 
@@ -27,7 +25,7 @@ namespace Sorrend.Core.UserMessages
         public UserOrientedException(
             IFormatProvider formatProvider,
             string messageTemplate,
-            [ItemCanBeNull] params object[] arguments)
+            params object?[] arguments)
             : base(FormatMessage(messageTemplate, arguments, formatProvider))
         {
             MessageTemplate = messageTemplate;
@@ -39,7 +37,7 @@ namespace Sorrend.Core.UserMessages
             Exception innerException,
             IFormatProvider formatProvider,
             string messageTemplate,
-            [ItemCanBeNull] params object[] arguments)
+            params object?[] arguments)
             : base(
                 FormatMessage(messageTemplate, arguments, formatProvider),
                 innerException)
@@ -51,7 +49,7 @@ namespace Sorrend.Core.UserMessages
 
         private static string FormatMessage(
             string messageTemplate,
-            object[] arguments,
+            object?[] arguments,
             IFormatProvider formatProvider)
         {
             return MessageFormatter.Format(
