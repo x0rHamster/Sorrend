@@ -1,40 +1,39 @@
 ﻿using System.Xml.Linq;
 
-namespace Sorrend.IntegrationTests.Tools.Packages
+namespace Sorrend.IntegrationTests.Tools.Packages;
+
+public static class PackageTranslator
 {
-    public static class PackageTranslator
+    public static XDocument GetNugetConfigXml(
+        string packageSourceDirectoryPath,
+        string globalPackagesDirectoryPath)
     {
-        public static XDocument GetNugetConfigXml(
-            string packageSourceDirectoryPath,
-            string globalPackagesDirectoryPath)
+        return Configuration(
+            Section(
+                "config",
+                Item("globalPackagesFolder", globalPackagesDirectoryPath),
+                Item("repositoryPath", globalPackagesDirectoryPath)),
+            Section(
+                "packageSources",
+                Item("local", packageSourceDirectoryPath)));
+
+        XDocument Configuration(params object[] sections)
+            => new(
+                new XDeclaration(null, null, null),
+                new XElement("configuration", sections));
+
+        XElement Section(string name, params object[] items)
         {
-            return Configuration(
-                Section(
-                    "config",
-                    Item("globalPackagesFolder", globalPackagesDirectoryPath),
-                    Item("repositoryPath", globalPackagesDirectoryPath)),
-                Section(
-                    "packageSources",
-                    Item("local", packageSourceDirectoryPath)));
-
-            XDocument Configuration(params object[] sections)
-                => new(
-                    new XDeclaration(null, null, null),
-                    new XElement("configuration", sections));
-
-            XElement Section(string name, params object[] items)
-            {
-                var element = new XElement(name);
-                element.Add(new XElement("clear"));
-                element.Add(items);
-                return element;
-            }
-
-            XElement Item(string key, string value)
-                => new(
-                    "add",
-                    new XAttribute("key", key),
-                    new XAttribute("value", value));
+            var element = new XElement(name);
+            element.Add(new XElement("clear"));
+            element.Add(items);
+            return element;
         }
+
+        XElement Item(string key, string value)
+            => new(
+                "add",
+                new XAttribute("key", key),
+                new XAttribute("value", value));
     }
 }

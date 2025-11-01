@@ -1,16 +1,14 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
-namespace Sorrend.IntegrationTests.Tools.Repositories
+namespace Sorrend.IntegrationTests.Tools.Repositories;
+
+public class CommitSpecification
 {
-    public class CommitSpecification
-    {
-        public DateTimeOffset? AuthorDateTime { get; set; }
+    public DateTimeOffset? AuthorDateTime { get; set; }
 
-        public CommitSpecification WithAuthorDateTime(string value)
-        {
-            AuthorDateTime = DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
-            return this;
-        }
+    public CommitSpecification WithAuthorDateTime(string value)
+    {
+        AuthorDateTime = DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
+        return this;
     }
 }

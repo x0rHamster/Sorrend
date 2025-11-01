@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-[assembly: SuppressMessage(
+﻿[assembly: SuppressMessage(
     "Major Code Smell",
     "S4144:Methods should not have identical implementations",
     Justification = "Different test cases may have the same implementation",

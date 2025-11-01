@@ -1,15 +1,13 @@
-﻿using System.Threading.Tasks;
-using Sorrend.Core.OperatingSystem;
+﻿using Sorrend.Core.OperatingSystem;
 
-namespace Sorrend.IntegrationTests.Tools.Repositories
+namespace Sorrend.IntegrationTests.Tools.Repositories;
+
+public class GitRepositoryFactory
 {
-    public class GitRepositoryFactory
+    public async Task<GitRepository> CreateAsync(string directoryPath)
     {
-        public async Task<GitRepository> CreateAsync(string directoryPath)
-        {
-            await new SystemCommand().RunAsync("git", "init", directoryPath);
+        await new SystemCommand().RunAsync("git", "init", directoryPath);
 
-            return new GitRepository(directoryPath);
-        }
+        return new GitRepository(directoryPath);
     }
 }

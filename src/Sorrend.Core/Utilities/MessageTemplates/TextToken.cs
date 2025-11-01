@@ -1,19 +1,17 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
-namespace Sorrend.Core.Utilities.MessageTemplates
+namespace Sorrend.Core.Utilities.MessageTemplates;
+
+internal class TextToken(string text) : IToken
 {
-    internal class TextToken(string text) : IToken
+    public void WriteTo(
+        StringBuilder builder,
+        object?[] arguments,
+        IFormatProvider formatProvider)
     {
-        public void WriteTo(
-            StringBuilder builder,
-            object?[] arguments,
-            IFormatProvider formatProvider)
-        {
-            builder.Append(
-                text
-                    .Replace("{{", "{")
-                    .Replace("}}", "}"));
-        }
+        builder.Append(
+            text
+                .Replace("{{", "{")
+                .Replace("}}", "}"));
     }
 }

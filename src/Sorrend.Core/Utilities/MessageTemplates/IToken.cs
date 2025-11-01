@@ -1,13 +1,11 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
-namespace Sorrend.Core.Utilities.MessageTemplates
+namespace Sorrend.Core.Utilities.MessageTemplates;
+
+internal interface IToken
 {
-    internal interface IToken
-    {
-        void WriteTo(
-            StringBuilder builder,
-            object?[] arguments,
-            IFormatProvider formatProvider);
-    }
+    void WriteTo(
+        StringBuilder builder,
+        object?[] arguments,
+        IFormatProvider formatProvider);
 }

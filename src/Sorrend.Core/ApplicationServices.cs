@@ -1,58 +1,54 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Sorrend.Core.AssemblyVersioning;
+﻿using Sorrend.Core.AssemblyVersioning;
 using Sorrend.Core.UserMessages;
 using Sorrend.Core.VersionControl;
 
-namespace Sorrend.Core
+namespace Sorrend.Core;
+
+public class ApplicationServices(
+    RepositoryLocator repositoryLocator,
+    AssemblyVersionCalculationFactory assemblyVersionCalculationFactory,
+    AssemblyVersionSerializer assemblyVersionSerializer)
 {
-    public class ApplicationServices(
-        RepositoryLocator repositoryLocator,
-        AssemblyVersionCalculationFactory assemblyVersionCalculationFactory,
-        AssemblyVersionSerializer assemblyVersionSerializer)
+    public async Task CalculateAssemblyVersionAsync(
+        string workingDirectoryPath,
+        string projectFilePathRelativeToWorkingDirectory,
+        string assemblyVersionFilePathRelativeToProject)
     {
-        public async Task CalculateAssemblyVersionAsync(
-            string workingDirectoryPath,
-            string projectFilePathRelativeToWorkingDirectory,
-            string assemblyVersionFilePathRelativeToProject)
+        var projectFilePath = Path.GetFullPath(
+            Path.Combine(
+                workingDirectoryPath,
+                projectFilePathRelativeToWorkingDirectory));
+
+        var projectDirectoryPath = Path.GetDirectoryName(projectFilePath)
+            ?? throw new ArgumentException(
+                $"Path \"{projectFilePath}\" does not have a directory.",
+                nameof(projectFilePathRelativeToWorkingDirectory));
+
+        var assemblyVersionFilePath = Path.GetFullPath(
+            Path.Combine(
+                projectDirectoryPath,
+                assemblyVersionFilePathRelativeToProject));
+
+        var calculation = assemblyVersionCalculationFactory.Create();
+
+        var repository = await repositoryLocator.GetAsync(projectDirectoryPath);
+        var commits = await repository.GetFirstParentCommitsAsync();
+
+        foreach (var commit in commits)
         {
-            var projectFilePath = Path.GetFullPath(
-                Path.Combine(
-                    workingDirectoryPath,
-                    projectFilePathRelativeToWorkingDirectory));
+            using var commitScope = UserMessageScopes.Commit(commit);
 
-            var projectDirectoryPath = Path.GetDirectoryName(projectFilePath)
-                ?? throw new ArgumentException(
-                    $"Path \"{projectFilePath}\" does not have a directory.",
-                    nameof(projectFilePathRelativeToWorkingDirectory));
+            calculation.Add(commit);
 
-            var assemblyVersionFilePath = Path.GetFullPath(
-                Path.Combine(
-                    projectDirectoryPath,
-                    assemblyVersionFilePathRelativeToProject));
-
-            var calculation = assemblyVersionCalculationFactory.Create();
-
-            var repository = await repositoryLocator.GetAsync(projectDirectoryPath);
-            var commits = await repository.GetFirstParentCommitsAsync();
-
-            foreach (var commit in commits)
+            if (calculation.HasResult)
             {
-                using var commitScope = UserMessageScopes.Commit(commit);
-
-                calculation.Add(commit);
-
-                if (calculation.HasResult)
-                {
-                    break;
-                }
+                break;
             }
-
-            var assemblyVersion = calculation.GetResult();
-
-            var assemblyVersionBytes = assemblyVersionSerializer.Serialize(assemblyVersion);
-            File.WriteAllBytes(assemblyVersionFilePath, assemblyVersionBytes);
         }
+
+        var assemblyVersion = calculation.GetResult();
+
+        var assemblyVersionBytes = assemblyVersionSerializer.Serialize(assemblyVersion);
+        File.WriteAllBytes(assemblyVersionFilePath, assemblyVersionBytes);
     }
 }

@@ -1,154 +1,150 @@
-﻿using System;
-using System.Linq;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using Sorrend.IntegrationTests.Utilities;
-using Xunit;
 
-namespace Sorrend.IntegrationTests.Tools.Projects
+namespace Sorrend.IntegrationTests.Tools.Projects;
+
+public static partial class ProjectTranslator
 {
-    public static partial class ProjectTranslator
+    private const string ChangeTokenPropertyName = "SorrendTestProjectChangeToken";
+
+    private static readonly XNamespace ProjectXmlNamespace = "http://schemas.microsoft.com/developer/msbuild/2003";
+
+    public static XDocument GetProjectXml(
+        ProjectSpecification specification,
+        string globalPackagesDirectoryPath)
     {
-        private const string ChangeTokenPropertyName = "SorrendTestProjectChangeToken";
+        return specification.EffectiveSdkStyle
+            ? GetSdkStyleProjectXml(specification)
+            : GetNonSdkStyleProjectXml(
+                specification,
+                globalPackagesDirectoryPath);
+    }
 
-        private static readonly XNamespace ProjectXmlNamespace = "http://schemas.microsoft.com/developer/msbuild/2003";
+    private static XDocument GetSdkStyleProjectXml(ProjectSpecification specification)
+    {
+        var targetFrameworkProperty = specification.TargetFrameworks.Count > 1
+            ? Property(
+                "TargetFrameworks",
+                string.Join(";", specification.TargetFrameworks.Select(GetTargetFrameworkMoniker)))
+            : Property(
+                "TargetFramework",
+                GetTargetFrameworkMoniker(specification.EffectiveTargetFramework));
 
-        public static XDocument GetProjectXml(
-            ProjectSpecification specification,
-            string globalPackagesDirectoryPath)
-        {
-            return specification.EffectiveSdkStyle
-                ? GetSdkStyleProjectXml(specification)
-                : GetNonSdkStyleProjectXml(
-                    specification,
-                    globalPackagesDirectoryPath);
-        }
-
-        private static XDocument GetSdkStyleProjectXml(ProjectSpecification specification)
-        {
-            var targetFrameworkProperty = specification.TargetFrameworks.Count > 1
-                ? Property(
-                    "TargetFrameworks",
-                    string.Join(";", specification.TargetFrameworks.Select(GetTargetFrameworkMoniker)))
-                : Property(
-                    "TargetFramework",
-                    GetTargetFrameworkMoniker(specification.EffectiveTargetFramework));
-
-            return Project(
-                PropertyGroup(
-                    targetFrameworkProperty,
-                    Property(
-                        ChangeTokenPropertyName,
-                        specification.ChangeToken.ToString())),
-                ItemGroup(
-                    specification.PackageReferences
-                        .Select(x => PackageReference(x.Id, x.Version, x.DevelopmentDependency))));
-
-            XDocument Project(params object[] content)
-                => new(
-                    new XElement(
-                        "Project",
-                        new XAttribute("Sdk", "Microsoft.NET.Sdk"),
-                        content));
-
-            XElement PropertyGroup(params object[] properties)
-                => new("PropertyGroup", properties);
-
-            XElement Property(string name, string value)
-                => new(name, value);
-
-            XElement ItemGroup(params object[] items)
-                => new("ItemGroup", items);
-
-            XElement PackageReference(string id, string version, bool developmentDependency)
-                => new(
-                    "PackageReference",
-                    new XAttribute("Include", id),
-                    new XAttribute("Version", version),
-                    developmentDependency
-                        ? new XAttribute("PrivateAssets", "all")
-                        : null);
-        }
-
-        private static XDocument GetNonSdkStyleProjectXml(
-            ProjectSpecification specification,
-            string globalPackagesDirectoryPath)
-        {
-            var ns = ProjectXmlNamespace;
-
-            return Project(
-                Import(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"),
+        return Project(
+            PropertyGroup(
+                targetFrameworkProperty,
+                Property(
+                    ChangeTokenPropertyName,
+                    specification.ChangeToken.ToString())),
+            ItemGroup(
                 specification.PackageReferences
-                    .Where(x => x.BuildProps.Exists)
-                    .Select(x => x.BuildProps.GetLegacyFilePath(globalPackagesDirectoryPath))
-                    .Select(Import),
-                PropertyGroup(
-                    Property("OutputType", "Library"),
-                    Property(
-                        "TargetFrameworkVersion",
-                        GetTargetFrameworkVersion(specification.EffectiveTargetFramework)),
-                    Property(
-                        ChangeTokenPropertyName,
-                        specification.ChangeToken.ToString())),
-                Import(@"$(MSBuildToolsPath)\Microsoft.CSharp.targets"),
-                specification.PackageReferences
-                    .Where(x => x.BuildTargets.Exists)
-                    .Select(x => x.BuildTargets.GetLegacyFilePath(globalPackagesDirectoryPath))
-                    .Select(Import));
+                    .Select(x => PackageReference(x.Id, x.Version, x.DevelopmentDependency))));
 
-            XDocument Project(params object[] content)
-                => new(
-                    new XDeclaration(null, null, null),
-                    new XElement(ns + "Project", content));
+        XDocument Project(params object[] content)
+            => new(
+                new XElement(
+                    "Project",
+                    new XAttribute("Sdk", "Microsoft.NET.Sdk"),
+                    content));
 
-            XElement Import(string projectFilePath)
-                => new(ns + "Import", new XAttribute("Project", projectFilePath));
+        XElement PropertyGroup(params object[] properties)
+            => new("PropertyGroup", properties);
 
-            XElement PropertyGroup(params object[] properties)
-                => new(ns + "PropertyGroup", properties);
+        XElement Property(string name, string value)
+            => new(name, value);
 
-            XElement Property(string name, string value)
-                => new(ns + name, value);
-        }
+        XElement ItemGroup(params object[] items)
+            => new("ItemGroup", items);
 
-        public static void SetProjectChangeToken(XDocument projectXml, Guid changeToken)
+        XElement PackageReference(string id, string version, bool developmentDependency)
+            => new(
+                "PackageReference",
+                new XAttribute("Include", id),
+                new XAttribute("Version", version),
+                developmentDependency
+                    ? new XAttribute("PrivateAssets", "all")
+                    : null);
+    }
+
+    private static XDocument GetNonSdkStyleProjectXml(
+        ProjectSpecification specification,
+        string globalPackagesDirectoryPath)
+    {
+        var ns = ProjectXmlNamespace;
+
+        return Project(
+            Import(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"),
+            specification.PackageReferences
+                .Where(x => x.BuildProps.Exists)
+                .Select(x => x.BuildProps.GetLegacyFilePath(globalPackagesDirectoryPath))
+                .Select(Import),
+            PropertyGroup(
+                Property("OutputType", "Library"),
+                Property(
+                    "TargetFrameworkVersion",
+                    GetTargetFrameworkVersion(specification.EffectiveTargetFramework)),
+                Property(
+                    ChangeTokenPropertyName,
+                    specification.ChangeToken.ToString())),
+            Import(@"$(MSBuildToolsPath)\Microsoft.CSharp.targets"),
+            specification.PackageReferences
+                .Where(x => x.BuildTargets.Exists)
+                .Select(x => x.BuildTargets.GetLegacyFilePath(globalPackagesDirectoryPath))
+                .Select(Import));
+
+        XDocument Project(params object[] content)
+            => new(
+                new XDeclaration(null, null, null),
+                new XElement(ns + "Project", content));
+
+        XElement Import(string projectFilePath)
+            => new(ns + "Import", new XAttribute("Project", projectFilePath));
+
+        XElement PropertyGroup(params object[] properties)
+            => new(ns + "PropertyGroup", properties);
+
+        XElement Property(string name, string value)
+            => new(ns + name, value);
+    }
+
+    public static void SetProjectChangeToken(XDocument projectXml, Guid changeToken)
+    {
+        var ns = projectXml.Root?.GetDefaultNamespace();
+        if (!string.IsNullOrEmpty(ns?.NamespaceName))
         {
-            var ns = projectXml.Root?.GetDefaultNamespace();
-            if (!string.IsNullOrEmpty(ns?.NamespaceName))
-            {
-                Assert.Equal(ProjectXmlNamespace, ns);
-            }
-
-            var changeTokenElement = projectXml
-                .ElementOrThrow(ns + "Project")
-                .Elements(ns + "PropertyGroup")
-                .SelectMany(x => x.Elements(ns + ChangeTokenPropertyName))
-                .Single();
-
-            changeTokenElement.Value = changeToken.ToString();
+            Assert.Equal(ProjectXmlNamespace, ns);
         }
 
-        public static XDocument GetPackagesConfigXml(ProjectSpecification specification)
-        {
-            return Packages(
-                specification.PackageReferences
-                    .Select(x => Package(x.Id, x.Version, x.DevelopmentDependency)));
+        var changeTokenElement = projectXml
+            .ElementOrThrow(ns + "Project")
+            .Elements(ns + "PropertyGroup")
+            .SelectMany(x => x.Elements(ns + ChangeTokenPropertyName))
+            .Single();
 
-            XDocument Packages(params object[] content)
-                => new(
-                    new XDeclaration(null, null, null),
-                    new XElement("packages", content));
+        changeTokenElement.Value = changeToken.ToString();
+    }
 
-            XElement Package(string id, string version, bool developmentDependency)
-                => new(
-                    "package",
-                    new XAttribute("id", id),
-                    new XAttribute("version", version),
-                    new XAttribute(
-                        "targetFramework",
-                        GetTargetFrameworkMoniker(specification.EffectiveTargetFramework)),
-                    developmentDependency
-                        ? new XAttribute("developmentDependency", true)
-                        : null);
-        }
+    public static XDocument GetPackagesConfigXml(ProjectSpecification specification)
+    {
+        return Packages(
+            specification.PackageReferences
+                .Select(x => Package(x.Id, x.Version, x.DevelopmentDependency)));
+
+        XDocument Packages(params object[] content)
+            => new(
+                new XDeclaration(null, null, null),
+                new XElement("packages", content));
+
+        XElement Package(string id, string version, bool developmentDependency)
+            => new(
+                "package",
+                new XAttribute("id", id),
+                new XAttribute("version", version),
+                new XAttribute(
+                    "targetFramework",
+                    GetTargetFrameworkMoniker(specification.EffectiveTargetFramework)),
+                developmentDependency
+                    ? new XAttribute("developmentDependency", true)
+                    : null);
     }
 }

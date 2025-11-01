@@ -1,10 +1,9 @@
-﻿namespace Sorrend.Core.Versions
+﻿namespace Sorrend.Core.Versions;
+
+public enum SemanticVersioningReleaseType
 {
-    public enum SemanticVersioningReleaseType
-    {
-        None,
-        Patch,
-        Minor,
-        Major,
-    }
+    None,
+    Patch,
+    Minor,
+    Major,
 }

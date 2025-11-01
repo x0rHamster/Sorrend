@@ -1,8 +1,7 @@
-﻿namespace Sorrend.IntegrationTests.Tools.Projects
+﻿namespace Sorrend.IntegrationTests.Tools.Projects;
+
+public enum TargetFramework
 {
-    public enum TargetFramework
-    {
-        NetFramework472,
-        Net8,
-    }
+    NetFramework472,
+    Net8,
 }

@@ -1,140 +1,136 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using Sorrend.Core.UserMessages;
 using Sorrend.Core.Utilities;
 using Sorrend.Core.VersionControl;
 using Sorrend.Core.Versions;
 
-namespace Sorrend.Core.AssemblyVersioning
+namespace Sorrend.Core.AssemblyVersioning;
+
+public class SemanticVersioningScheme(CommitVersionParser commitVersionParser)
 {
-    public class SemanticVersioningScheme(CommitVersionParser commitVersionParser)
+    private const int MaximumPreReleaseIdentifierCount = 3;
+
+    private const string InitialVersion = "0.1.0-dev.0";
+    private const string DefaultPrefixPreReleaseIdentifier = "dev";
+
+    public SemanticVersion GetInitialVersion()
+        => SemanticVersion.Parse(InitialVersion);
+
+    public SemanticVersion? FindBaseVersion(Commit commit)
     {
-        private const int MaximumPreReleaseIdentifierCount = 3;
+        var candidates = GetBaseVersionCandidates(commit);
 
-        private const string InitialVersion = "0.1.0-dev.0";
-        private const string DefaultPrefixPreReleaseIdentifier = "dev";
-
-        public SemanticVersion GetInitialVersion()
-            => SemanticVersion.Parse(InitialVersion);
-
-        public SemanticVersion? FindBaseVersion(Commit commit)
+        if (candidates.Count == 0)
         {
-            var candidates = GetBaseVersionCandidates(commit);
-
-            if (candidates.Count == 0)
-            {
-                return null;
-            }
-
-            var version = GetSingleBaseVersion(candidates);
-            ValidateBaseVersion(version);
-            ValidateCommitHashEquality(version, commit);
-            return version;
+            return null;
         }
 
-        private IReadOnlyCollection<SemanticVersion> GetBaseVersionCandidates(Commit commit)
-            => commitVersionParser.ParseTags(commit.Tags);
+        var version = GetSingleBaseVersion(candidates);
+        ValidateBaseVersion(version);
+        ValidateCommitHashEquality(version, commit);
+        return version;
+    }
 
-        private static SemanticVersion GetSingleBaseVersion(IReadOnlyCollection<SemanticVersion> candidates)
-            => candidates.Count > 1
-                ? throw UserOrientedExceptions.MultipleBaseVersions(candidates)
-                : candidates.First();
+    private IReadOnlyCollection<SemanticVersion> GetBaseVersionCandidates(Commit commit)
+        => commitVersionParser.ParseTags(commit.Tags);
 
-        private static void ValidateBaseVersion(SemanticVersion version)
+    private static SemanticVersion GetSingleBaseVersion(IReadOnlyCollection<SemanticVersion> candidates)
+        => candidates.Count > 1
+            ? throw UserOrientedExceptions.MultipleBaseVersions(candidates)
+            : candidates.First();
+
+    private static void ValidateBaseVersion(SemanticVersion version)
+    {
+        if (
+            version.PreReleaseIdentifiers.TryGetValue(index: 0, out var prefixIdentifier)
+            && prefixIdentifier.IsInteger())
         {
-            if (
-                version.PreReleaseIdentifiers.TryGetValue(index: 0, out var prefixIdentifier)
-                && prefixIdentifier.IsInteger())
-            {
-                throw UserOrientedExceptions.NumericPreReleasePrefix(prefixIdentifier);
-            }
-
-            if (
-                version.PreReleaseIdentifiers.TryGetValue(index: 1, out var counterIdentifier)
-                && (
-                    !counterIdentifier.TryParseCanonicalInteger(out var counterIdentifierValue)
-                    || counterIdentifierValue < 0))
-            {
-                throw UserOrientedExceptions.PreReleaseCounterMustBeNonNegative(counterIdentifier);
-            }
-
-            if (version.PreReleaseIdentifiers.Count > MaximumPreReleaseIdentifierCount)
-            {
-                throw UserOrientedExceptions.TooManyPreReleaseIdentifiers(
-                    version.PreReleaseSuffix,
-                    MaximumPreReleaseIdentifierCount);
-            }
+            throw UserOrientedExceptions.NumericPreReleasePrefix(prefixIdentifier);
         }
 
-        private void ValidateCommitHashEquality(SemanticVersion version, Commit commit)
+        if (
+            version.PreReleaseIdentifiers.TryGetValue(index: 1, out var counterIdentifier)
+            && (
+                !counterIdentifier.TryParseCanonicalInteger(out var counterIdentifierValue)
+                || counterIdentifierValue < 0))
         {
-            if (version.PreReleaseIdentifiers.TryGetValue(index: 2, out var commitHashIdentifier))
-            {
-                commitVersionParser.ValidateHashPreReleaseIdentifier(commitHashIdentifier, commit.Hash);
-            }
+            throw UserOrientedExceptions.PreReleaseCounterMustBeNonNegative(counterIdentifier);
         }
 
-        public void UpdateVersionIncrement(SemanticVersionIncrement versionIncrement)
+        if (version.PreReleaseIdentifiers.Count > MaximumPreReleaseIdentifierCount)
         {
-            versionIncrement.AddPreRelease(SemanticVersioningReleaseType.Patch);
+            throw UserOrientedExceptions.TooManyPreReleaseIdentifiers(
+                version.PreReleaseSuffix,
+                MaximumPreReleaseIdentifierCount);
         }
+    }
 
-        public SemanticVersion GetIncrementVersion(
-            SemanticVersion baseVersion,
-            SemanticVersionIncrement versionIncrement,
-            Commit latestIncrementCommit)
+    private void ValidateCommitHashEquality(SemanticVersion version, Commit commit)
+    {
+        if (version.PreReleaseIdentifiers.TryGetValue(index: 2, out var commitHashIdentifier))
         {
-            ValidateBaseVersion(baseVersion);
+            commitVersionParser.ValidateHashPreReleaseIdentifier(commitHashIdentifier, commit.Hash);
+        }
+    }
 
-            var incrementMajorVersion = versionIncrement.GetMajorVersion(baseVersion);
-            var incrementMinorVersion = versionIncrement.GetMinorVersion(baseVersion);
-            var incrementPatchVersion = versionIncrement.GetPatchVersion(baseVersion);
+    public void UpdateVersionIncrement(SemanticVersionIncrement versionIncrement)
+    {
+        versionIncrement.AddPreRelease(SemanticVersioningReleaseType.Patch);
+    }
 
-            var incrementCommitHash = latestIncrementCommit.Hash;
+    public SemanticVersion GetIncrementVersion(
+        SemanticVersion baseVersion,
+        SemanticVersionIncrement versionIncrement,
+        Commit latestIncrementCommit)
+    {
+        ValidateBaseVersion(baseVersion);
 
-            var basePrefixPreReleaseIdentifier = baseVersion.PreReleaseIdentifiers
-                .GetValueOrDefault(index: 0);
+        var incrementMajorVersion = versionIncrement.GetMajorVersion(baseVersion);
+        var incrementMinorVersion = versionIncrement.GetMinorVersion(baseVersion);
+        var incrementPatchVersion = versionIncrement.GetPatchVersion(baseVersion);
 
-            var incrementPrefixPreReleaseIdentifier = versionIncrement.GetPrefixPreReleaseIdentifier(
-                baseVersion,
-                basePrefixPreReleaseIdentifier,
-                DefaultPrefixPreReleaseIdentifier);
+        var incrementCommitHash = latestIncrementCommit.Hash;
 
-            if (incrementPrefixPreReleaseIdentifier == null)
-            {
-                return new SemanticVersion(
-                    incrementMajorVersion,
-                    incrementMinorVersion,
-                    incrementPatchVersion,
-                    string.Empty,
-                    "+" + incrementCommitHash);
-            }
+        var basePrefixPreReleaseIdentifier = baseVersion.PreReleaseIdentifiers
+            .GetValueOrDefault(index: 0);
 
-            var baseCounterPreReleaseIdentifier = baseVersion.PreReleaseIdentifiers
-                .TryGetValue(index: 1, out var baseCounterPreReleaseIdentifierAsString)
-                ? int.Parse(baseCounterPreReleaseIdentifierAsString, CultureInfo.InvariantCulture)
-                : (int?)null;
+        var incrementPrefixPreReleaseIdentifier = versionIncrement.GetPrefixPreReleaseIdentifier(
+            baseVersion,
+            basePrefixPreReleaseIdentifier,
+            DefaultPrefixPreReleaseIdentifier);
 
-            var incrementCounterPreReleaseIdentifier = versionIncrement
-                    .GetCounterPreReleaseIdentifier(baseVersion, baseCounterPreReleaseIdentifier)
-                ?? throw new InvalidOperationException(
-                    "The version increment returned a pre-release prefix, but cannot return a pre-release counter. Please report a bug.");
-
-            var incrementCommitHashPreReleaseIdentifier =
-                commitVersionParser.GetHashPreReleaseIdentifier(incrementCommitHash);
-
+        if (incrementPrefixPreReleaseIdentifier == null)
+        {
             return new SemanticVersion(
                 incrementMajorVersion,
                 incrementMinorVersion,
                 incrementPatchVersion,
-                [
-                    incrementPrefixPreReleaseIdentifier,
-                    incrementCounterPreReleaseIdentifier.ToString(CultureInfo.InvariantCulture),
-                    incrementCommitHashPreReleaseIdentifier,
-                ],
-                string.Empty);
+                string.Empty,
+                "+" + incrementCommitHash);
         }
+
+        var baseCounterPreReleaseIdentifier = baseVersion.PreReleaseIdentifiers
+            .TryGetValue(index: 1, out var baseCounterPreReleaseIdentifierAsString)
+            ? int.Parse(baseCounterPreReleaseIdentifierAsString, CultureInfo.InvariantCulture)
+            : (int?)null;
+
+        var incrementCounterPreReleaseIdentifier = versionIncrement
+                .GetCounterPreReleaseIdentifier(baseVersion, baseCounterPreReleaseIdentifier)
+            ?? throw new InvalidOperationException(
+                "The version increment returned a pre-release prefix, but cannot return a pre-release counter. Please report a bug.");
+
+        var incrementCommitHashPreReleaseIdentifier =
+            commitVersionParser.GetHashPreReleaseIdentifier(incrementCommitHash);
+
+        return new SemanticVersion(
+            incrementMajorVersion,
+            incrementMinorVersion,
+            incrementPatchVersion,
+            [
+                incrementPrefixPreReleaseIdentifier,
+                incrementCounterPreReleaseIdentifier.ToString(CultureInfo.InvariantCulture),
+                incrementCommitHashPreReleaseIdentifier,
+            ],
+            string.Empty);
     }
 }

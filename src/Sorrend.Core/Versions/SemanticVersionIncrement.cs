@@ -1,204 +1,202 @@
-﻿using System;
-using Sorrend.Core.UserMessages;
+﻿using Sorrend.Core.UserMessages;
 
-namespace Sorrend.Core.Versions
+namespace Sorrend.Core.Versions;
+
+public class SemanticVersionIncrement
 {
-    public class SemanticVersionIncrement
+    private int _majorReleaseCount;
+    private int _minorReleaseCount;
+    private int _patchReleaseCount;
+    private SemanticVersioningReleaseType _preReleaseType;
+
+    private int _counterPreReleaseIdentifierIncrement;
+
+    private SemanticVersioningReleaseType LargestReleaseType
+        => _majorReleaseCount > 0 ? SemanticVersioningReleaseType.Major
+            : _minorReleaseCount > 0 ? SemanticVersioningReleaseType.Minor
+            : _patchReleaseCount > 0 ? SemanticVersioningReleaseType.Patch
+            : SemanticVersioningReleaseType.None;
+
+    private bool HasReleases
+        => LargestReleaseType != SemanticVersioningReleaseType.None;
+
+    private bool HasPreReleases
+        => _preReleaseType != SemanticVersioningReleaseType.None;
+
+    public int GetMajorVersion(SemanticVersion currentVersion)
+        => GetNormalVersionIdentifier(
+            currentVersion.MajorVersion,
+            currentVersion.IsPreRelease,
+            SemanticVersioningReleaseType.Major,
+            _majorReleaseCount);
+
+    public int GetMinorVersion(SemanticVersion currentVersion)
+        => GetNormalVersionIdentifier(
+            currentVersion.MinorVersion,
+            currentVersion.IsPreRelease,
+            SemanticVersioningReleaseType.Minor,
+            _minorReleaseCount);
+
+    public int GetPatchVersion(SemanticVersion currentVersion)
+        => GetNormalVersionIdentifier(
+            currentVersion.PatchVersion,
+            currentVersion.IsPreRelease,
+            SemanticVersioningReleaseType.Patch,
+            _patchReleaseCount);
+
+    private int GetNormalVersionIdentifier(
+        int currentValue,
+        bool currentVersionIsPreRelease,
+        SemanticVersioningReleaseType releaseType,
+        int releaseCount)
     {
-        private int _majorReleaseCount;
-        private int _minorReleaseCount;
-        private int _patchReleaseCount;
-        private SemanticVersioningReleaseType _preReleaseType;
-
-        private int _counterPreReleaseIdentifierIncrement;
-
-        private SemanticVersioningReleaseType LargestReleaseType
-            => _majorReleaseCount > 0 ? SemanticVersioningReleaseType.Major
-                : _minorReleaseCount > 0 ? SemanticVersioningReleaseType.Minor
-                : _patchReleaseCount > 0 ? SemanticVersioningReleaseType.Patch
-                : SemanticVersioningReleaseType.None;
-
-        private bool HasReleases
-            => LargestReleaseType != SemanticVersioningReleaseType.None;
-
-        private bool HasPreReleases
-            => _preReleaseType != SemanticVersioningReleaseType.None;
-
-        public int GetMajorVersion(SemanticVersion currentVersion)
-            => GetNormalVersionIdentifier(
-                currentVersion.MajorVersion,
-                currentVersion.IsPreRelease,
-                SemanticVersioningReleaseType.Major,
-                _majorReleaseCount);
-
-        public int GetMinorVersion(SemanticVersion currentVersion)
-            => GetNormalVersionIdentifier(
-                currentVersion.MinorVersion,
-                currentVersion.IsPreRelease,
-                SemanticVersioningReleaseType.Minor,
-                _minorReleaseCount);
-
-        public int GetPatchVersion(SemanticVersion currentVersion)
-            => GetNormalVersionIdentifier(
-                currentVersion.PatchVersion,
-                currentVersion.IsPreRelease,
-                SemanticVersioningReleaseType.Patch,
-                _patchReleaseCount);
-
-        private int GetNormalVersionIdentifier(
-            int currentValue,
-            bool currentVersionIsPreRelease,
-            SemanticVersioningReleaseType releaseType,
-            int releaseCount)
+        try
         {
-            try
-            {
-                var targetValue = currentValue;
+            var targetValue = currentValue;
 
-                if (LargestReleaseType > releaseType)
+            if (LargestReleaseType > releaseType)
+            {
+                targetValue = 0;
+            }
+
+            checked
+            {
+                targetValue += releaseCount;
+            }
+
+            if (HasReleases || !currentVersionIsPreRelease)
+            {
+                if (_preReleaseType > releaseType)
                 {
                     targetValue = 0;
                 }
 
-                checked
+                if (_preReleaseType == releaseType)
                 {
-                    targetValue += releaseCount;
+                    targetValue++;
                 }
-
-                if (HasReleases || !currentVersionIsPreRelease)
-                {
-                    if (_preReleaseType > releaseType)
-                    {
-                        targetValue = 0;
-                    }
-
-                    if (_preReleaseType == releaseType)
-                    {
-                        targetValue++;
-                    }
-                }
-
-                return targetValue;
             }
-            catch (OverflowException)
-            {
-                throw UserOrientedExceptions.IncrementOverflowsNormalVersion();
-            }
+
+            return targetValue;
+        }
+        catch (OverflowException)
+        {
+            throw UserOrientedExceptions.IncrementOverflowsNormalVersion();
+        }
+    }
+
+    public string? GetPrefixPreReleaseIdentifier(
+        SemanticVersion currentVersion,
+        string? currentValue,
+        string defaultValue)
+    {
+        if (HasPreReleases)
+        {
+            return currentValue ?? defaultValue;
         }
 
-        public string? GetPrefixPreReleaseIdentifier(
-            SemanticVersion currentVersion,
-            string? currentValue,
-            string defaultValue)
+        if (HasReleases)
         {
-            if (HasPreReleases)
+            return null;
+        }
+
+        if (currentVersion.IsPreRelease)
+        {
+            return currentValue ?? defaultValue;
+        }
+
+        return null;
+    }
+
+    public int? GetCounterPreReleaseIdentifier(SemanticVersion currentVersion, int? currentValue)
+    {
+        try
+        {
+            var targetValue = currentValue;
+
+            if (currentVersion.IsPreRelease)
             {
-                return currentValue ?? defaultValue;
+                targetValue ??= 1;
             }
 
             if (HasReleases)
+            {
+                targetValue = null;
+            }
+
+            if (targetValue == null && !HasPreReleases)
             {
                 return null;
             }
 
-            if (currentVersion.IsPreRelease)
+            if (_counterPreReleaseIdentifierIncrement > 0)
             {
-                return currentValue ?? defaultValue;
+                targetValue ??= 0;
+
+                checked
+                {
+                    targetValue += _counterPreReleaseIdentifierIncrement;
+                }
             }
 
-            return null;
+            return targetValue;
+        }
+        catch (OverflowException)
+        {
+            throw UserOrientedExceptions.IncrementOverflowsPreReleaseCounter();
+        }
+    }
+
+    public void AddRelease(SemanticVersioningReleaseType type)
+    {
+        if (type == SemanticVersioningReleaseType.None)
+        {
+            throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
 
-        public int? GetCounterPreReleaseIdentifier(SemanticVersion currentVersion, int? currentValue)
+        if (LargestReleaseType > type)
         {
-            try
-            {
-                var targetValue = currentValue;
-
-                if (currentVersion.IsPreRelease)
-                {
-                    targetValue ??= 1;
-                }
-
-                if (HasReleases)
-                {
-                    targetValue = null;
-                }
-
-                if (targetValue == null && !HasPreReleases)
-                {
-                    return null;
-                }
-
-                if (_counterPreReleaseIdentifierIncrement > 0)
-                {
-                    targetValue ??= 0;
-
-                    checked
-                    {
-                        targetValue += _counterPreReleaseIdentifierIncrement;
-                    }
-                }
-
-                return targetValue;
-            }
-            catch (OverflowException)
-            {
-                throw UserOrientedExceptions.IncrementOverflowsPreReleaseCounter();
-            }
+            return;
         }
 
-        public void AddRelease(SemanticVersioningReleaseType type)
+        switch (type)
         {
-            if (type == SemanticVersioningReleaseType.None)
-            {
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+            case SemanticVersioningReleaseType.Major:
+                _majorReleaseCount++;
+                break;
 
-            if (LargestReleaseType > type)
-            {
-                return;
-            }
+            case SemanticVersioningReleaseType.Minor:
+                _minorReleaseCount++;
+                break;
 
-            switch (type)
-            {
-                case SemanticVersioningReleaseType.Major:
-                    _majorReleaseCount++;
-                    break;
+            case SemanticVersioningReleaseType.Patch:
+                _patchReleaseCount++;
+                break;
+        }
+    }
 
-                case SemanticVersioningReleaseType.Minor:
-                    _minorReleaseCount++;
-                    break;
-
-                case SemanticVersioningReleaseType.Patch:
-                    _patchReleaseCount++;
-                    break;
-            }
+    public void AddPreRelease(SemanticVersioningReleaseType type)
+    {
+        if (type == SemanticVersioningReleaseType.None)
+        {
+            throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
 
-        public void AddPreRelease(SemanticVersioningReleaseType type)
+        if (HasReleases)
         {
-            if (type == SemanticVersioningReleaseType.None)
+            if (type > LargestReleaseType)
             {
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                AddRelease(type);
             }
 
-            if (HasReleases)
-            {
-                if (type > LargestReleaseType)
-                {
-                    AddRelease(type);
-                }
+            return;
+        }
 
-                return;
-            }
+        _counterPreReleaseIdentifierIncrement++;
 
-            _counterPreReleaseIdentifierIncrement++;
-
-            if (_preReleaseType < type)
-            {
-                _preReleaseType = type;
-            }
+        if (_preReleaseType < type)
+        {
+            _preReleaseType = type;
         }
     }
 }

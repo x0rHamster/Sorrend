@@ -1,74 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Sorrend.Core.OperatingSystem;
+﻿using Sorrend.Core.OperatingSystem;
 
-namespace Sorrend.IntegrationTests.Tools.Repositories
+namespace Sorrend.IntegrationTests.Tools.Repositories;
+
+public class GitRepository(string rootDirectoryPath)
 {
-    public class GitRepository(string rootDirectoryPath)
+    private const int ShortCommitHashLength = 7;
+
+    public Task<CommitDescription> CommitAsync(Action<CommitSpecification>? configure = null)
     {
-        private const int ShortCommitHashLength = 7;
+        var specification = new CommitSpecification();
+        configure?.Invoke(specification);
+        return CommitAsync(specification);
+    }
 
-        public Task<CommitDescription> CommitAsync(Action<CommitSpecification>? configure = null)
+    private async Task<CommitDescription> CommitAsync(CommitSpecification specification)
+    {
+        await RunAsync("git", "add", rootDirectoryPath);
+
+        var arguments = new List<string>
         {
-            var specification = new CommitSpecification();
-            configure?.Invoke(specification);
-            return CommitAsync(specification);
+            "git",
+            "commit",
+            "--allow-empty",
+            "--message=commit",
+        };
+
+        if (specification.AuthorDateTime != null)
+        {
+            arguments.Add($"--date={specification.AuthorDateTime:O}");
         }
 
-        private async Task<CommitDescription> CommitAsync(CommitSpecification specification)
-        {
-            await RunAsync("git", "add", rootDirectoryPath);
+        await new SystemCommand()
+            .WithWorkingDirectory(rootDirectoryPath)
+            .RunAsync(arguments);
 
-            var arguments = new List<string>
-            {
-                "git",
-                "commit",
-                "--allow-empty",
-                "--message=commit",
-            };
+        return await GetHeadCommitAsync();
+    }
 
-            if (specification.AuthorDateTime != null)
-            {
-                arguments.Add($"--date={specification.AuthorDateTime:O}");
-            }
+    public async Task TagAsync(string name)
+        => await RunAsync("git", "tag", name);
 
-            await new SystemCommand()
-                .WithWorkingDirectory(rootDirectoryPath)
-                .RunAsync(arguments);
+    public async Task CreateBranchAsync(string name)
+        => await RunAsync("git", "branch", name);
 
-            return await GetHeadCommitAsync();
-        }
+    public async Task CheckoutAsync(string revision)
+        => await RunAsync("git", "checkout", revision);
 
-        public async Task TagAsync(string name)
-            => await RunAsync("git", "tag", name);
+    public async Task<CommitDescription> MergeAsync(string revision)
+    {
+        await RunAsync("git", "merge", "--no-ff", revision);
+        return await GetHeadCommitAsync();
+    }
 
-        public async Task CreateBranchAsync(string name)
-            => await RunAsync("git", "branch", name);
+    private async Task<CommitDescription> GetHeadCommitAsync()
+    {
+        var output = await RunAsync("git", "rev-parse", "HEAD");
+        var commitHash = output.TrimEnd('\n');
+        return new CommitDescription(commitHash, ShortCommitHashLength);
+    }
 
-        public async Task CheckoutAsync(string revision)
-            => await RunAsync("git", "checkout", revision);
+    private async Task<string> RunAsync(params string[] arguments)
+    {
+        var result = await new SystemCommand()
+            .WithWorkingDirectory(rootDirectoryPath)
+            .RunAsync(arguments);
 
-        public async Task<CommitDescription> MergeAsync(string revision)
-        {
-            await RunAsync("git", "merge", "--no-ff", revision);
-            return await GetHeadCommitAsync();
-        }
-
-        private async Task<CommitDescription> GetHeadCommitAsync()
-        {
-            var output = await RunAsync("git", "rev-parse", "HEAD");
-            var commitHash = output.TrimEnd('\n');
-            return new CommitDescription(commitHash, ShortCommitHashLength);
-        }
-
-        private async Task<string> RunAsync(params string[] arguments)
-        {
-            var result = await new SystemCommand()
-                .WithWorkingDirectory(rootDirectoryPath)
-                .RunAsync(arguments);
-
-            return result.StandardOutput;
-        }
+        return result.StandardOutput;
     }
 }

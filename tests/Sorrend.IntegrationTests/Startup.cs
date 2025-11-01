@@ -6,20 +6,19 @@ using Sorrend.IntegrationTests.Tools.Projects;
 using Sorrend.IntegrationTests.Tools.Repositories;
 using Sorrend.IntegrationTests.Tools.SystemUnderTest;
 
-namespace Sorrend.IntegrationTests
+namespace Sorrend.IntegrationTests;
+
+public static class Startup
 {
-    public static class Startup
+    public static void ConfigureServices(IServiceCollection services)
     {
-        public static void ConfigureServices(IServiceCollection services)
-        {
-            services.AddSingleton<TestingEnvironment.Provider>();
-            services.AddSingleton<PackageAnalyzer>();
-            services.AddSingleton<PackageManager.Provider>();
-            services.AddSingleton<ProjectFactory>();
-            services.AddSingleton<BuildSystem.Provider>();
-            services.AddSingleton<AssemblyAnalyzer>();
-            services.AddSingleton<GitRepositoryFactory>();
-            services.AddSingleton<HeadlessSut>();
-        }
+        services.AddSingleton<TestingEnvironment.Provider>();
+        services.AddSingleton<PackageAnalyzer>();
+        services.AddSingleton<PackageManager.Provider>();
+        services.AddSingleton<ProjectFactory>();
+        services.AddSingleton<BuildSystem.Provider>();
+        services.AddSingleton<AssemblyAnalyzer>();
+        services.AddSingleton<GitRepositoryFactory>();
+        services.AddSingleton<HeadlessSut>();
     }
 }

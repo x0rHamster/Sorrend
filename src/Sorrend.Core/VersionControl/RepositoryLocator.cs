@@ -1,15 +1,12 @@
-using System.Threading.Tasks;
+namespace Sorrend.Core.VersionControl;
 
-namespace Sorrend.Core.VersionControl
+public class RepositoryLocator(GitVersionControlSystem gitVersionControlSystem)
 {
-    public class RepositoryLocator(GitVersionControlSystem gitVersionControlSystem)
+    public async Task<Repository> GetAsync(string repositoryRelatedDirectoryPath)
     {
-        public async Task<Repository> GetAsync(string repositoryRelatedDirectoryPath)
-        {
-            var repositoryRootDirectoryPath = await gitVersionControlSystem
-                .GetRepositoryRootDirectoryPathAsync(repositoryRelatedDirectoryPath);
+        var repositoryRootDirectoryPath = await gitVersionControlSystem
+            .GetRepositoryRootDirectoryPathAsync(repositoryRelatedDirectoryPath);
 
-            return new Repository(gitVersionControlSystem, repositoryRootDirectoryPath);
-        }
+        return new Repository(gitVersionControlSystem, repositoryRootDirectoryPath);
     }
 }
