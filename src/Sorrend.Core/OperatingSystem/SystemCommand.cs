@@ -5,9 +5,9 @@ namespace Sorrend.Core.OperatingSystem;
 
 public class SystemCommand
 {
-    private string? _workingDirectoryPath;
+    private AbsolutePath? _workingDirectoryPath;
 
-    public SystemCommand WithWorkingDirectory(string directoryPath)
+    public SystemCommand WithWorkingDirectory(AbsolutePath directoryPath)
     {
         _workingDirectoryPath = directoryPath;
         return this;
@@ -46,7 +46,7 @@ public class SystemCommand
         var errorTask = process.StandardError.ReadToEndAsync();
 
         return new SystemCommandResult(
-            Path.GetFileName(process.StartInfo.FileName),
+            new RelativePath(process.StartInfo.FileName).BaseName,
             await exitTcs.Task,
             await outputTask,
             await errorTask);
@@ -58,7 +58,7 @@ public class SystemCommand
         {
             StartInfo =
             {
-                WorkingDirectory = _workingDirectoryPath ?? string.Empty,
+                WorkingDirectory = _workingDirectoryPath?.ToString() ?? string.Empty,
                 UseShellExecute = false,
                 CreateNoWindow = true,
             },

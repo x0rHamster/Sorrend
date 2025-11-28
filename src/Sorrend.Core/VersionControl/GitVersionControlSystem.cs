@@ -11,16 +11,16 @@ public class GitVersionControlSystem
     private static readonly Regex LogCommitFieldSeparatorRegex = new(@"\n");
     private static readonly Regex LogCommitTagSeparatorRegex = new("(?:^|, )tag: ");
 
-    public async Task<string> GetRepositoryRootDirectoryPathAsync(string repositoryRelatedDirectoryPath)
+    public async Task<AbsolutePath> GetRepositoryRootDirectoryPathAsync(AbsolutePath repositoryRelatedDirectoryPath)
     {
         var commandResult = await new SystemCommand()
             .WithWorkingDirectory(repositoryRelatedDirectoryPath)
             .RunAsync("git", "rev-parse", "--show-toplevel");
 
-        return commandResult.StandardOutput.TrimEnd('\n');
+        return new AbsolutePath(commandResult.StandardOutput.TrimEnd('\n'));
     }
 
-    public async Task<IReadOnlyList<Commit>> GetFirstParentCommitsAsync(string repositoryRootDirectoryPath)
+    public async Task<IReadOnlyList<Commit>> GetFirstParentCommitsAsync(AbsolutePath repositoryRootDirectoryPath)
     {
         var logCommandResult = await new SystemCommand()
             .WithWorkingDirectory(repositoryRootDirectoryPath)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sorrend.Core;
+using Sorrend.Core.OperatingSystem;
 using Sorrend.Core.UserMessages;
 using Sorrend.MsBuildTool.Logging;
 
@@ -28,15 +29,12 @@ internal static class Program
         try
         {
             var args = Environment.GetCommandLineArgs();
-            var projectFilePath = args[1];
-            var assemblyVersionFilePath = args[2];
+            var projectFilePath = AbsolutePath.WorkingDirectory / args[1];
+            var assemblyVersionFilePath = projectFilePath.ParentDirectory / args[2];
 
             await provider
                 .GetRequiredService<ApplicationServices>()
-                .CalculateAssemblyVersionAsync(
-                    Directory.GetCurrentDirectory(),
-                    projectFilePath,
-                    assemblyVersionFilePath);
+                .CalculateAssemblyVersionAsync(projectFilePath, assemblyVersionFilePath);
         }
         catch (UserOrientedException e)
         {

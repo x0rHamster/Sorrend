@@ -1,4 +1,5 @@
-﻿using Sorrend.IntegrationTests.Tools;
+﻿using System.IO;
+using Sorrend.IntegrationTests.Tools;
 using Sorrend.IntegrationTests.Tools.Repositories;
 using Sorrend.IntegrationTests.Tools.SystemUnderTest;
 
@@ -15,8 +16,8 @@ public class GitCompatibilityTests(
         var testingEnvironment = await testingEnvironmentProvider.GetAsync();
         var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
 
-        var repositoryRootDirectoryPath = Path.Combine(workingDirectoryPath, Generate.DirectoryName());
-        var someRepositoryFilePath = Path.Combine(repositoryRootDirectoryPath, Generate.FileName());
+        var repositoryRootDirectoryPath = workingDirectoryPath / Generate.DirectoryName();
+        var someRepositoryFilePath = repositoryRootDirectoryPath / Generate.FileName();
 
         var expectedCommits = new List<CommitDescription>();
 
@@ -29,7 +30,7 @@ public class GitCompatibilityTests(
 
         await repository.CheckoutAsync("feature");
 
-        File.WriteAllText(someRepositoryFilePath, "contents");
+        File.WriteAllText(someRepositoryFilePath.ToString(), "contents");
         await repository.CommitAsync();
 
         await repository.CheckoutAsync("develop");

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 using Sorrend.Core.OperatingSystem;
 using Sorrend.IntegrationTests.Utilities;
 
@@ -6,9 +7,9 @@ namespace Sorrend.IntegrationTests.Tools.Projects;
 
 public class BuildSystem
 {
-    private readonly string? _msbuildExecutablePath;
+    private readonly AbsolutePath? _msbuildExecutablePath;
 
-    private BuildSystem(string? msbuildExecutablePath)
+    private BuildSystem(AbsolutePath? msbuildExecutablePath)
     {
         _msbuildExecutablePath = msbuildExecutablePath;
     }
@@ -29,7 +30,7 @@ public class BuildSystem
         => await new SystemCommand()
             .WithWorkingDirectory(project.DirectoryPath)
             .RunAsync(
-                _msbuildExecutablePath ?? "msbuild",
+                _msbuildExecutablePath?.ToString() ?? "msbuild",
                 "-target:Clean");
 
     public Task BuildAsync(ProjectDescription project)
@@ -73,7 +74,7 @@ public class BuildSystem
         => await new SystemCommand()
             .WithWorkingDirectory(project.DirectoryPath)
             .RunAsync(
-                _msbuildExecutablePath ?? "msbuild",
+                _msbuildExecutablePath?.ToString() ?? "msbuild",
                 "-nologo",
                 "-verbosity:minimal",
                 $"-property:Configuration={project.BuildConfiguration}");
@@ -106,14 +107,14 @@ public class BuildSystem
         if (_msbuildExecutablePath != null)
         {
             arguments.Add("-MsBuildPath");
-            arguments.Add(Path.GetDirectoryName(_msbuildExecutablePath));
+            arguments.Add(_msbuildExecutablePath.ParentDirectory.ToString());
         }
 
         arguments.Add("-Properties");
         arguments.Add($"Configuration={project.BuildConfiguration}");
 
         arguments.Add("-OutputDirectory");
-        arguments.Add(Path.GetDirectoryName(project.PackageFilePath));
+        arguments.Add(project.PackageFilePath.ParentDirectory.ToString());
 
         arguments.Add("-OutputFileNamesWithoutVersion");
 
@@ -130,29 +131,27 @@ public class BuildSystem
             return new BuildSystem(msbuildExecutablePath);
         }
 
-        private static Task<string?> ResolveToolboxRiderMsBuildExecutablePathAsync()
+        private static Task<AbsolutePath?> ResolveToolboxRiderMsBuildExecutablePathAsync()
         {
-            var riderScriptFilePath =
-                Environment.ExpandEnvironmentVariables(
-                    @"%LOCALAPPDATA%\JetBrains\Toolbox\scripts\Rider.cmd");
+            var riderScriptFilePath = AbsolutePath.LocalAppDataDirectory
+                / "JetBrains/Toolbox/scripts/Rider.cmd";
 
-            if (!File.Exists(riderScriptFilePath))
+            if (!File.Exists(riderScriptFilePath.ToString()))
             {
-                return Task.FromResult<string?>(null);
+                return Task.FromResult<AbsolutePath?>(null);
             }
 
-            var riderScriptText = File.ReadAllText(riderScriptFilePath);
+            var riderScriptText = File.ReadAllText(riderScriptFilePath.ToString());
             var riderDirectoryPathMatch = Regex.Match(riderScriptText, @"\s([^\s]+?)\\bin\\rider64.exe\b");
             if (!riderDirectoryPathMatch.Success)
             {
-                return Task.FromResult<string?>(null);
+                return Task.FromResult<AbsolutePath?>(null);
             }
 
-            var result = Path.Combine(
-                riderDirectoryPathMatch.Groups[1].Value,
-                "tools/MSBuild/Current/Bin/MSBuild.exe");
+            var result = new AbsolutePath(riderDirectoryPathMatch.Groups[1].Value)
+                / "tools/MSBuild/Current/Bin/MSBuild.exe";
 
-            return Task.FromResult<string?>(result);
+            return Task.FromResult<AbsolutePath?>(result);
         }
     }
 }

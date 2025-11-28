@@ -1,6 +1,7 @@
 ﻿using System.Xml.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Sorrend.Core;
+using Sorrend.Core.OperatingSystem;
 using Sorrend.Core.VersionControl;
 
 namespace Sorrend.IntegrationTests.Tools.SystemUnderTest;
@@ -27,21 +28,18 @@ public sealed class HeadlessSut : IDisposable
         _provider.Dispose();
     }
 
-    public async Task<AssemblyVersionFileContent> CalculateAssemblyVersionAsync(string projectFilePath)
+    public async Task<AssemblyVersionFileContent> CalculateAssemblyVersionAsync(AbsolutePath projectFilePath)
     {
         var testingEnvironment = await _testingEnvironmentProvider.GetAsync();
 
         var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
-        var assemblyVersionFilePath = Path.Combine(workingDirectoryPath, Generate.FileName());
+        var assemblyVersionFilePath = workingDirectoryPath / Generate.FileName();
 
         await _provider
             .GetRequiredService<ApplicationServices>()
-            .CalculateAssemblyVersionAsync(
-                testingEnvironment.WorkingDirectoryPath,
-                projectFilePath,
-                assemblyVersionFilePath);
+            .CalculateAssemblyVersionAsync(projectFilePath, assemblyVersionFilePath);
 
-        var assemblyVersionXml = XDocument.Load(assemblyVersionFilePath);
+        var assemblyVersionXml = XDocument.Load(assemblyVersionFilePath.ToString());
         return new AssemblyVersionFileContent(assemblyVersionXml);
     }
 }

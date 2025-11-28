@@ -1,16 +1,17 @@
 ﻿using System.IO.Compression;
 using System.Xml.Linq;
+using Sorrend.Core.OperatingSystem;
 
 namespace Sorrend.IntegrationTests.Tools.Packages;
 
 public class PackageAnalyzer
 {
-    public Task<PackageDescription> LoadAsync(string filePath)
+    public Task<PackageDescription> LoadAsync(AbsolutePath filePath)
     {
-        using var archive = ZipFile.OpenRead(filePath);
+        using var archive = ZipFile.OpenRead(filePath.ToString());
 
         var archiveEntryPaths = archive.Entries
-            .Select(x => x.FullName)
+            .Select(x => new RelativePath(x.FullName))
             .ToArray();
 
         var nuspecArchiveEntryIndex = Array.FindIndex(

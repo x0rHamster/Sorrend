@@ -1,4 +1,6 @@
-﻿using Sorrend.IntegrationTests.Utilities;
+﻿using System.IO;
+using Sorrend.Core.OperatingSystem;
+using Sorrend.IntegrationTests.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools;
 
@@ -6,22 +8,21 @@ public sealed class TestingEnvironment : IDisposable
 {
     private readonly DirectoryInfo _workingDirectory;
 
-    public string WorkingDirectoryPath { get; }
+    public AbsolutePath WorkingDirectoryPath { get; }
 
-    public string PackageUnderTestFilePath
-        => Path.Combine(TestAssemblyDirectoryPath, "Sorrend.MsBuildTool.nupkg");
+    public AbsolutePath PackageUnderTestFilePath
+        => TestAssemblyDirectoryPath / "Sorrend.MsBuildTool.nupkg";
 
-    private string TestAssemblyDirectoryPath { get; }
+    private AbsolutePath TestAssemblyDirectoryPath { get; }
 
     private TestingEnvironment()
     {
-        TestAssemblyDirectoryPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
+        TestAssemblyDirectoryPath = AbsolutePath.GetAssemblyDirectory<TestingEnvironment>();
 
-        WorkingDirectoryPath = Path.Combine(
-            Path.GetTempPath(),
-            $"Sorrend-{DateTime.UtcNow:yyMMdd-HHmm}-{Generate.DirectoryName()}");
+        WorkingDirectoryPath = AbsolutePath.TempDirectory
+            / $"Sorrend-{DateTime.UtcNow:yyMMdd-HHmm}-{Generate.DirectoryName()}";
 
-        _workingDirectory = new DirectoryInfo(WorkingDirectoryPath);
+        _workingDirectory = new DirectoryInfo(WorkingDirectoryPath.ToString());
         _workingDirectory.Create();
     }
 

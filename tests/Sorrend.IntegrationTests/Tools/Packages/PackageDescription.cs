@@ -1,5 +1,5 @@
-﻿using System.Text.RegularExpressions;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
+using Sorrend.Core.OperatingSystem;
 using Sorrend.IntegrationTests.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools.Packages;
@@ -30,7 +30,7 @@ public class PackageDescription
 
     public PackageDescription(
         XDocument nuspecXml,
-        IReadOnlyCollection<string> packageFilePathsRelativeToPackage)
+        IReadOnlyCollection<RelativePath> packageFilePathsRelativeToPackage)
     {
         var ns = nuspecXml.Root?.GetDefaultNamespace();
         Assert.Contains(ns, NuspecXmlNamespaces);
@@ -55,16 +55,23 @@ public class PackageDescription
                 .ToArray()
             ?? [];
 
-        BuildProps = FindFile(packageFilePathsRelativeToPackage, $"build/{Id}.props");
-        BuildTargets = FindFile(packageFilePathsRelativeToPackage, $"build/{Id}.targets");
+        BuildProps = FindFile(
+            packageFilePathsRelativeToPackage,
+            new RelativePath($"build/{Id}.props"));
+
+        BuildTargets = FindFile(
+            packageFilePathsRelativeToPackage,
+            new RelativePath($"build/{Id}.targets"));
     }
 
-    public static bool IsNuspec(string filePathRelativeToPackage)
-        => Regex.IsMatch(filePathRelativeToPackage, @"^[^/]+\.nuspec$", RegexOptions.IgnoreCase);
+    public static bool IsNuspec(RelativePath filePathRelativeToPackage)
+        => filePathRelativeToPackage.Components.Count == 1
+            && !filePathRelativeToPackage.HasRelativeComponents
+            && filePathRelativeToPackage.EndsWithExtension("nuspec");
 
     private File FindFile(
-        IEnumerable<string> packageFilePathsRelativeToPackage,
-        string filePathRelativeToPackage)
+        IEnumerable<RelativePath> packageFilePathsRelativeToPackage,
+        RelativePath filePathRelativeToPackage)
     {
         return new File(
             this,
@@ -74,12 +81,12 @@ public class PackageDescription
 
     public class File(
         PackageDescription package,
-        string filePathRelativeToPackage,
+        RelativePath filePathRelativeToPackage,
         bool exists)
     {
         public bool Exists => exists;
 
-        public string GetLegacyFilePath(string globalPackagesDirectoryPath)
+        public AbsolutePath GetLegacyFilePath(AbsolutePath globalPackagesDirectoryPath)
         {
             if (!exists)
             {
@@ -87,10 +94,9 @@ public class PackageDescription
                     $"The package \"{package.Id}\" does not contain a file \"{filePathRelativeToPackage}\".");
             }
 
-            return Path.Combine(
-                globalPackagesDirectoryPath,
-                $"{package.Id}.{package.Version}",
-                filePathRelativeToPackage);
+            return globalPackagesDirectoryPath
+                / $"{package.Id}.{package.Version}"
+                / filePathRelativeToPackage;
         }
     }
 }

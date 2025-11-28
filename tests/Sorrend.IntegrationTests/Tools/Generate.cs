@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Sorrend.IntegrationTests.Tools;
 
 public static class Generate

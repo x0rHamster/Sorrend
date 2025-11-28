@@ -1,4 +1,5 @@
 ﻿using System.Xml.Linq;
+using Sorrend.Core.OperatingSystem;
 using Sorrend.IntegrationTests.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools.Projects;
@@ -11,7 +12,7 @@ public static partial class ProjectTranslator
 
     public static XDocument GetProjectXml(
         ProjectSpecification specification,
-        string globalPackagesDirectoryPath)
+        AbsolutePath globalPackagesDirectoryPath)
     {
         return specification.EffectiveSdkStyle
             ? GetSdkStyleProjectXml(specification)
@@ -68,7 +69,7 @@ public static partial class ProjectTranslator
 
     private static XDocument GetNonSdkStyleProjectXml(
         ProjectSpecification specification,
-        string globalPackagesDirectoryPath)
+        AbsolutePath globalPackagesDirectoryPath)
     {
         var ns = ProjectXmlNamespace;
 
@@ -77,7 +78,7 @@ public static partial class ProjectTranslator
             specification.PackageReferences
                 .Where(x => x.BuildProps.Exists)
                 .Select(x => x.BuildProps.GetLegacyFilePath(globalPackagesDirectoryPath))
-                .Select(Import),
+                .Select(x => Import(x.ToString())),
             PropertyGroup(
                 Property("OutputType", "Library"),
                 Property(
@@ -90,7 +91,7 @@ public static partial class ProjectTranslator
             specification.PackageReferences
                 .Where(x => x.BuildTargets.Exists)
                 .Select(x => x.BuildTargets.GetLegacyFilePath(globalPackagesDirectoryPath))
-                .Select(Import));
+                .Select(x => Import(x.ToString())));
 
         XDocument Project(params object[] content)
             => new(

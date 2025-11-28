@@ -1,4 +1,5 @@
-﻿using Sorrend.Core.OperatingSystem;
+﻿using System.IO;
+using Sorrend.Core.OperatingSystem;
 using Sorrend.IntegrationTests.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools.Packages;
@@ -6,11 +7,11 @@ namespace Sorrend.IntegrationTests.Tools.Packages;
 public class PackageManager
 {
     private readonly PackageAnalyzer _packageAnalyzer;
-    private readonly string _packageSourceDirectoryPath;
+    private readonly AbsolutePath _packageSourceDirectoryPath;
 
     private PackageDescription? _initializedPackageUnderTest;
 
-    public string GlobalPackagesDirectoryPath { get; }
+    public AbsolutePath GlobalPackagesDirectoryPath { get; }
 
     public PackageDescription PackageUnderTest
         => _initializedPackageUnderTest
@@ -19,23 +20,23 @@ public class PackageManager
 
     private PackageManager(
         PackageAnalyzer packageAnalyzer,
-        string packageSourceDirectoryPath,
-        string globalPackagesDirectoryPath)
+        AbsolutePath packageSourceDirectoryPath,
+        AbsolutePath globalPackagesDirectoryPath)
     {
         _packageAnalyzer = packageAnalyzer;
         _packageSourceDirectoryPath = packageSourceDirectoryPath;
         GlobalPackagesDirectoryPath = globalPackagesDirectoryPath;
     }
 
-    private async Task<PackageDescription> PushPackageAsync(string filePath)
+    private async Task<PackageDescription> PushPackageAsync(AbsolutePath filePath)
     {
         await new SystemCommand().RunAsync(
             "dotnet",
             "nuget",
             "push",
-            filePath,
+            filePath.ToString(),
             "--source",
-            _packageSourceDirectoryPath);
+            _packageSourceDirectoryPath.ToString());
 
         return await _packageAnalyzer.LoadAsync(filePath);
     }
@@ -50,8 +51,8 @@ public class PackageManager
             var testingEnvironment = await testingEnvironmentProvider.GetAsync();
 
             var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
-            var packageSourceDirectoryPath = Path.Combine(workingDirectoryPath, "PackageSource");
-            var globalPackagesDirectoryPath = Path.Combine(workingDirectoryPath, "GlobalPackages");
+            var packageSourceDirectoryPath = workingDirectoryPath / "PackageSource";
+            var globalPackagesDirectoryPath = workingDirectoryPath / "GlobalPackages";
 
             await InitializeEnvironmentAsync(
                 workingDirectoryPath,
@@ -70,19 +71,19 @@ public class PackageManager
         }
 
         private static Task InitializeEnvironmentAsync(
-            string workingDirectoryPath,
-            string packageSourceDirectoryPath,
-            string globalPackagesDirectoryPath)
+            AbsolutePath workingDirectoryPath,
+            AbsolutePath packageSourceDirectoryPath,
+            AbsolutePath globalPackagesDirectoryPath)
         {
-            Directory.CreateDirectory(packageSourceDirectoryPath);
-            Directory.CreateDirectory(globalPackagesDirectoryPath);
+            Directory.CreateDirectory(packageSourceDirectoryPath.ToString());
+            Directory.CreateDirectory(globalPackagesDirectoryPath.ToString());
 
             var nugetConfigXml = PackageTranslator.GetNugetConfigXml(
                 packageSourceDirectoryPath,
                 globalPackagesDirectoryPath);
 
-            var nugetConfigFilePath = Path.Combine(workingDirectoryPath, "nuget.config");
-            nugetConfigXml.Save(nugetConfigFilePath);
+            var nugetConfigFilePath = workingDirectoryPath / "nuget.config";
+            nugetConfigXml.Save(nugetConfigFilePath.ToString());
 
             return Task.CompletedTask;
         }

@@ -1,21 +1,22 @@
 ﻿using System.Xml.Linq;
+using Sorrend.Core.OperatingSystem;
 
 namespace Sorrend.IntegrationTests.Tools.Packages;
 
 public static class PackageTranslator
 {
     public static XDocument GetNugetConfigXml(
-        string packageSourceDirectoryPath,
-        string globalPackagesDirectoryPath)
+        AbsolutePath packageSourceDirectoryPath,
+        AbsolutePath globalPackagesDirectoryPath)
     {
         return Configuration(
             Section(
                 "config",
-                Item("globalPackagesFolder", globalPackagesDirectoryPath),
-                Item("repositoryPath", globalPackagesDirectoryPath)),
+                Item("globalPackagesFolder", globalPackagesDirectoryPath.ToString()),
+                Item("repositoryPath", globalPackagesDirectoryPath.ToString())),
             Section(
                 "packageSources",
-                Item("local", packageSourceDirectoryPath)));
+                Item("local", packageSourceDirectoryPath.ToString())));
 
         XDocument Configuration(params object[] sections)
             => new(

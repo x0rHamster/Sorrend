@@ -1,4 +1,6 @@
-﻿using Sorrend.Core.AssemblyVersioning;
+﻿using System.IO;
+using Sorrend.Core.AssemblyVersioning;
+using Sorrend.Core.OperatingSystem;
 using Sorrend.Core.UserMessages;
 using Sorrend.Core.VersionControl;
 
@@ -10,24 +12,10 @@ public class ApplicationServices(
     AssemblyVersionSerializer assemblyVersionSerializer)
 {
     public async Task CalculateAssemblyVersionAsync(
-        string workingDirectoryPath,
-        string projectFilePathRelativeToWorkingDirectory,
-        string assemblyVersionFilePathRelativeToProject)
+        AbsolutePath projectFilePath,
+        AbsolutePath assemblyVersionFilePath)
     {
-        var projectFilePath = Path.GetFullPath(
-            Path.Combine(
-                workingDirectoryPath,
-                projectFilePathRelativeToWorkingDirectory));
-
-        var projectDirectoryPath = Path.GetDirectoryName(projectFilePath)
-            ?? throw new ArgumentException(
-                $"Path \"{projectFilePath}\" does not have a directory.",
-                nameof(projectFilePathRelativeToWorkingDirectory));
-
-        var assemblyVersionFilePath = Path.GetFullPath(
-            Path.Combine(
-                projectDirectoryPath,
-                assemblyVersionFilePathRelativeToProject));
+        var projectDirectoryPath = projectFilePath.ParentDirectory;
 
         var calculation = assemblyVersionCalculationFactory.Create();
 
@@ -49,6 +37,6 @@ public class ApplicationServices(
         var assemblyVersion = calculation.GetResult();
 
         var assemblyVersionBytes = assemblyVersionSerializer.Serialize(assemblyVersion);
-        File.WriteAllBytes(assemblyVersionFilePath, assemblyVersionBytes);
+        File.WriteAllBytes(assemblyVersionFilePath.ToString(), assemblyVersionBytes);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Sorrend.IntegrationTests.Tools.Repositories;
 
-public class GitRepository(string rootDirectoryPath)
+public class GitRepository(AbsolutePath rootDirectoryPath)
 {
     private const int ShortCommitHashLength = 7;
 
@@ -15,7 +15,7 @@ public class GitRepository(string rootDirectoryPath)
 
     private async Task<CommitDescription> CommitAsync(CommitSpecification specification)
     {
-        await RunAsync("git", "add", rootDirectoryPath);
+        await RunAsync("git", "add", rootDirectoryPath.ToString());
 
         var arguments = new List<string>
         {

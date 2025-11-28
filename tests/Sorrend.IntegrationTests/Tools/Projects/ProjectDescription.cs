@@ -1,32 +1,33 @@
+using Sorrend.Core.OperatingSystem;
+
 namespace Sorrend.IntegrationTests.Tools.Projects;
 
 public class ProjectDescription
 {
-    public string DirectoryPath
-        => Path.GetDirectoryName(FilePath)!;
+    public AbsolutePath DirectoryPath
+        => FilePath.ParentDirectory;
 
-    public string FilePath { get; }
+    public AbsolutePath FilePath { get; }
 
     public bool SdkStyle { get; }
 
     public string BuildConfiguration => "Debug";
 
-    public IReadOnlyCollection<string> AssemblyFilePaths { get; }
+    public IReadOnlyCollection<AbsolutePath> AssemblyFilePaths { get; }
 
-    public string AssemblyFilePath
+    public AbsolutePath AssemblyFilePath
         => AssemblyFilePaths.Count > 1
             ? throw new InvalidOperationException(
                 $"The property \"{nameof(AssemblyFilePaths)}\" contains multiple values, use it instead.")
             : AssemblyFilePaths.Single();
 
-    public string PackageFilePath
-        => Path.Combine(
-            DirectoryPath,
-            "bin",
-            BuildConfiguration,
-            $"{Path.GetFileNameWithoutExtension(FilePath)}.nupkg");
+    public AbsolutePath PackageFilePath
+        => DirectoryPath
+            / "bin"
+            / BuildConfiguration
+            / $"{FilePath.BaseNameWithoutExtensions}.nupkg";
 
-    public ProjectDescription(string filePath, ProjectSpecification specification)
+    public ProjectDescription(AbsolutePath filePath, ProjectSpecification specification)
     {
         var targetFrameworks = specification.TargetFrameworks.Any()
             ? specification.TargetFrameworks.AsEnumerable()
@@ -41,19 +42,19 @@ public class ProjectDescription
 
         AssemblyFilePaths = targetFrameworkMonikers
             .Select(tfm => GetOutputDirectoryPath("bin", tfm))
-            .Select(x => Path.Combine(x, $"{Path.GetFileNameWithoutExtension(FilePath)}.dll"))
+            .Select(x => x / $"{FilePath.BaseNameWithoutExtensions}.dll")
             .ToArray();
     }
 
-    private string GetOutputDirectoryPath(string directoryName, string targetFrameworkMoniker)
+    private AbsolutePath GetOutputDirectoryPath(string directoryName, string targetFrameworkMoniker)
     {
-        var parts = new List<string> { DirectoryPath, directoryName, BuildConfiguration };
+        var result = DirectoryPath / directoryName / BuildConfiguration;
 
         if (SdkStyle)
         {
-            parts.Add(targetFrameworkMoniker);
+            result /= targetFrameworkMoniker;
         }
 
-        return Path.Combine(parts.ToArray());
+        return result;
     }
 }

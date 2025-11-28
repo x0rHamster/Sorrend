@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.IO;
+using System.Xml.Linq;
 using Sorrend.IntegrationTests.Tools.Packages;
 
 namespace Sorrend.IntegrationTests.Tools.Projects;
@@ -27,21 +28,21 @@ public class ProjectFactory(
 
         var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
 
-        var projectDirectoryPath = Path.Combine(workingDirectoryPath, Generate.DirectoryName());
-        Directory.CreateDirectory(projectDirectoryPath);
+        var projectDirectoryPath = workingDirectoryPath / Generate.DirectoryName();
+        Directory.CreateDirectory(projectDirectoryPath.ToString());
 
         var projectXml = ProjectTranslator.GetProjectXml(
             specification,
             packageManager.GlobalPackagesDirectoryPath);
 
-        var projectFilePath = Path.Combine(projectDirectoryPath, "Project.csproj");
-        projectXml.Save(projectFilePath);
+        var projectFilePath = projectDirectoryPath / "Project.csproj";
+        projectXml.Save(projectFilePath.ToString());
 
         if (!specification.EffectiveSdkStyle)
         {
             var packagesConfigXml = ProjectTranslator.GetPackagesConfigXml(specification);
-            var packagesConfigFilePath = Path.Combine(projectDirectoryPath, "packages.config");
-            packagesConfigXml.Save(packagesConfigFilePath);
+            var packagesConfigFilePath = projectDirectoryPath / "packages.config";
+            packagesConfigXml.Save(packagesConfigFilePath.ToString());
         }
 
         return new ProjectDescription(projectFilePath, specification);
@@ -51,9 +52,9 @@ public class ProjectFactory(
     {
         var changeToken = Guid.NewGuid();
 
-        var projectXml = XDocument.Load(project.FilePath);
+        var projectXml = XDocument.Load(project.FilePath.ToString());
         ProjectTranslator.SetProjectChangeToken(projectXml, changeToken);
-        projectXml.Save(project.FilePath);
+        projectXml.Save(project.FilePath.ToString());
 
         return Task.CompletedTask;
     }
