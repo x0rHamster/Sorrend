@@ -1,10 +1,11 @@
 ﻿using Sorrend.Core.UserMessages;
 using Sorrend.Core.VersionControl;
+using Sorrend.Core.VersioningSchemes;
 using Sorrend.Core.Versions;
 
 namespace Sorrend.Core.AssemblyVersioning;
 
-public class AssemblyVersionCalculation(SemanticVersioningScheme versioningScheme)
+public class AssemblyVersionCalculation(IVersioningScheme versioningScheme)
 {
     private const int MaximumAssemblyNormalVersionIdentifier = 65534;
 
@@ -16,14 +17,14 @@ public class AssemblyVersionCalculation(SemanticVersioningScheme versioningSchem
     public bool HasResult
         => _baseVersion != null;
 
-    public void Add(Commit commit)
+    public void Add(Commit commit, AssemblyVersioningConfiguration configuration)
     {
         if (HasResult)
         {
             return;
         }
 
-        var baseVersionFromCommit = versioningScheme.FindBaseVersion(commit);
+        var baseVersionFromCommit = versioningScheme.FindBaseVersion(commit, configuration.VersioningSchemes);
         if (baseVersionFromCommit != null)
         {
             using var versionScope = UserMessageScopes.Version(baseVersionFromCommit);
@@ -35,13 +36,13 @@ public class AssemblyVersionCalculation(SemanticVersioningScheme versioningSchem
             return;
         }
 
-        versioningScheme.UpdateVersionIncrement(_versionIncrement);
+        versioningScheme.UpdateVersionIncrement(_versionIncrement, configuration.VersioningSchemes);
         _latestIncrementCommit ??= commit;
     }
 
-    public AssemblyVersionProperties GetResult()
+    public AssemblyVersionProperties GetResult(AssemblyVersioningConfiguration configuration)
     {
-        var baseVersion = _baseVersion ?? versioningScheme.GetInitialVersion();
+        var baseVersion = _baseVersion ?? versioningScheme.GetInitialVersion(configuration.VersioningSchemes);
         using var baseVersionScope = UserMessageScopes.BaseVersion(baseVersion);
 
         // TODO increment version should indicate that there were no commits
@@ -50,13 +51,19 @@ public class AssemblyVersionCalculation(SemanticVersioningScheme versioningSchem
         var latestIncrementVersion = versioningScheme.GetIncrementVersion(
             baseVersion,
             _versionIncrement,
-            latestIncrementCommit);
+            latestIncrementCommit,
+            configuration.VersioningSchemes);
 
         using var versionScope = UserMessageScopes.Version(latestIncrementVersion);
 
         ValidateAssemblyVersion(latestIncrementVersion);
 
-        return new AssemblyVersionProperties(latestIncrementVersion);
+        var majorVersionsAreIncompatible =
+            versioningScheme.AreMajorVersionsIncompatible(configuration.VersioningSchemes);
+
+        return new AssemblyVersionProperties(
+            latestIncrementVersion,
+            majorVersionsAreIncompatible);
     }
 
     private static void ValidateAssemblyVersion(SemanticVersion version)

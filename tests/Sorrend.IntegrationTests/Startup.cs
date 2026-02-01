@@ -19,6 +19,7 @@ public static class Startup
         services.AddSingleton<BuildSystem.Provider>();
         services.AddSingleton<AssemblyAnalyzer>();
         services.AddSingleton<GitRepositoryFactory>();
+        services.AddSingleton<SutConfigurationWriter>();
         services.AddSingleton<HeadlessSut>();
     }
 }

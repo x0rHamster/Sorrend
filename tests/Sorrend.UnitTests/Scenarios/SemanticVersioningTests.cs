@@ -1,5 +1,6 @@
 ﻿using Sorrend.Core.AssemblyVersioning;
 using Sorrend.Core.UserMessages;
+using Sorrend.Core.VersioningSchemes;
 using Sorrend.UnitTests.Tools;
 
 namespace Sorrend.UnitTests.Scenarios;
@@ -8,6 +9,10 @@ public class SemanticVersioningTests
 {
     private static readonly SemanticVersioningScheme DefaultSemanticVersioningScheme = new(
         new CommitVersionParser());
+
+    private static readonly AssemblyVersioningConfiguration DefaultConfiguration = new(
+        new VersioningSchemesConfiguration(
+            VersioningSchemeIdentifier.SemanticVersioning));
 
     [Theory]
     [InlineData("2.3.4-dev")]
@@ -20,8 +25,8 @@ public class SemanticVersioningTests
         var commit = Generate.Commit(tag: version);
         var calculation = CreateCalculation();
 
-        calculation.Add(commit);
-        var result = calculation.GetResult();
+        calculation.Add(commit, DefaultConfiguration);
+        var result = calculation.GetResult(DefaultConfiguration);
 
         Assert.StartsWith(version + ".1.", result.Version);
     }
@@ -33,9 +38,9 @@ public class SemanticVersioningTests
         var incrementCommit = Generate.Commit();
         var calculation = CreateCalculation();
 
-        calculation.Add(incrementCommit);
-        calculation.Add(baseCommit);
-        var result = calculation.GetResult();
+        calculation.Add(incrementCommit, DefaultConfiguration);
+        calculation.Add(baseCommit, DefaultConfiguration);
+        var result = calculation.GetResult(DefaultConfiguration);
 
         Assert.StartsWith("2.3.5-dev.1.", result.Version);
     }
@@ -49,8 +54,8 @@ public class SemanticVersioningTests
         var commit = Generate.Commit(tag: version);
         var calculation = CreateCalculation();
 
-        calculation.Add(commit);
-        var result = calculation.GetResult();
+        calculation.Add(commit, DefaultConfiguration);
+        var result = calculation.GetResult(DefaultConfiguration);
 
         Assert.StartsWith(version + ".", result.Version);
     }
@@ -66,8 +71,8 @@ public class SemanticVersioningTests
         Assert.ThrowsAny<UserOrientedException>(
             () =>
             {
-                calculation.Add(commit);
-                calculation.GetResult();
+                calculation.Add(commit, DefaultConfiguration);
+                calculation.GetResult(DefaultConfiguration);
             });
     }
 
@@ -81,9 +86,9 @@ public class SemanticVersioningTests
         Assert.ThrowsAny<UserOrientedException>(
             () =>
             {
-                calculation.Add(incrementCommit);
-                calculation.Add(baseCommit);
-                calculation.GetResult();
+                calculation.Add(incrementCommit, DefaultConfiguration);
+                calculation.Add(baseCommit, DefaultConfiguration);
+                calculation.GetResult(DefaultConfiguration);
             });
     }
 
@@ -102,8 +107,8 @@ public class SemanticVersioningTests
         Assert.ThrowsAny<UserOrientedException>(
             () =>
             {
-                calculation.Add(commit);
-                calculation.GetResult();
+                calculation.Add(commit, DefaultConfiguration);
+                calculation.GetResult(DefaultConfiguration);
             });
     }
 
@@ -114,9 +119,9 @@ public class SemanticVersioningTests
         var incrementCommit = Generate.Commit(hash: "22222222222222222222222222222222");
         var calculation = CreateCalculation();
 
-        calculation.Add(incrementCommit);
-        calculation.Add(baseCommit);
-        var result = calculation.GetResult();
+        calculation.Add(incrementCommit, DefaultConfiguration);
+        calculation.Add(baseCommit, DefaultConfiguration);
+        var result = calculation.GetResult(DefaultConfiguration);
 
         Assert.EndsWith(".r222222222222", result.Version);
     }
@@ -131,8 +136,8 @@ public class SemanticVersioningTests
         Assert.ThrowsAny<UserOrientedException>(
             () =>
             {
-                calculation.Add(commit);
-                calculation.GetResult();
+                calculation.Add(commit, DefaultConfiguration);
+                calculation.GetResult(DefaultConfiguration);
             });
     }
 
@@ -150,8 +155,8 @@ public class SemanticVersioningTests
         Assert.ThrowsAny<UserOrientedException>(
             () =>
             {
-                calculation.Add(commit);
-                calculation.GetResult();
+                calculation.Add(commit, DefaultConfiguration);
+                calculation.GetResult(DefaultConfiguration);
             });
     }
 

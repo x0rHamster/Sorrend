@@ -24,7 +24,7 @@ public class ProjectSpecification
             1 => TargetFrameworks[0],
 
             _ => EffectiveSdkStyle
-                ? TargetFramework.Net8
+                ? TargetFramework.Net10
                 : TargetFramework.NetFramework472,
         };
 

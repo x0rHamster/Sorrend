@@ -1,5 +1,5 @@
+using Sorrend.Core.VersioningSchemes;
 using Sorrend.IntegrationTests.Tools;
-using Sorrend.IntegrationTests.Tools.Packages;
 using Sorrend.IntegrationTests.Tools.Projects;
 using Sorrend.IntegrationTests.Tools.Repositories;
 using Sorrend.IntegrationTests.Tools.SystemUnderTest;
@@ -7,18 +7,20 @@ using Sorrend.IntegrationTests.Tools.SystemUnderTest;
 namespace Sorrend.IntegrationTests.Scenarios;
 
 public class SemanticVersioningTests(
-    PackageManager.Provider packageManagerProvider,
     ProjectFactory projectFactory,
     GitRepositoryFactory gitRepositoryFactory,
-    HeadlessSut headlessSut)
+    HeadlessSut headlessSut,
+    SutConfigurationWriter sutConfigurationWriter)
 {
     [Fact]
     public async Task InitialCommit_IsZeroMajorPreRelease()
     {
-        var packageManager = await packageManagerProvider.GetAsync();
+        var project = await projectFactory.CreateAsync();
 
-        var project = await projectFactory.CreateAsync(
-            x => x.WithReference(packageManager.PackageUnderTest));
+        await sutConfigurationWriter.WriteAsync(
+            specification => specification
+                .WithFileDirectory(project.DirectoryPath)
+                .WithVersioningScheme(VersioningSchemeIdentifier.SemanticVersioning));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         await repository.CommitAsync();
@@ -35,6 +37,11 @@ public class SemanticVersioningTests(
     public async Task Commit_IncrementsPreReleaseCounter()
     {
         var project = await projectFactory.CreateAsync();
+
+        await sutConfigurationWriter.WriteAsync(
+            specification => specification
+                .WithFileDirectory(project.DirectoryPath)
+                .WithVersioningScheme(VersioningSchemeIdentifier.SemanticVersioning));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         await repository.CommitAsync();
@@ -57,6 +64,11 @@ public class SemanticVersioningTests(
     public async Task MergeCommit_IncrementsPreReleaseCounter_FromBaseBranch()
     {
         var project = await projectFactory.CreateAsync();
+
+        await sutConfigurationWriter.WriteAsync(
+            specification => specification
+                .WithFileDirectory(project.DirectoryPath)
+                .WithVersioningScheme(VersioningSchemeIdentifier.SemanticVersioning));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         await repository.CommitAsync();
@@ -86,6 +98,11 @@ public class SemanticVersioningTests(
     {
         var project = await projectFactory.CreateAsync();
 
+        await sutConfigurationWriter.WriteAsync(
+            specification => specification
+                .WithFileDirectory(project.DirectoryPath)
+                .WithVersioningScheme(VersioningSchemeIdentifier.SemanticVersioning));
+
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         await repository.CommitAsync();
 
@@ -103,6 +120,11 @@ public class SemanticVersioningTests(
     public async Task CommitAfterTagged_IsPatchPreRelease()
     {
         var project = await projectFactory.CreateAsync();
+
+        await sutConfigurationWriter.WriteAsync(
+            specification => specification
+                .WithFileDirectory(project.DirectoryPath)
+                .WithVersioningScheme(VersioningSchemeIdentifier.SemanticVersioning));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         await repository.CommitAsync();

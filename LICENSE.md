@@ -1,6 +1,6 @@
 MIT License
 
-Copyright 2025 Aleksandr Romanov <x0rhamster@ya.ru>
+Copyright 2026 Aleksandr Romanov <x0rhamster@ya.ru>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation

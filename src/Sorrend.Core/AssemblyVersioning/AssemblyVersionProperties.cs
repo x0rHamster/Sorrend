@@ -3,7 +3,9 @@ using Sorrend.Core.Versions;
 
 namespace Sorrend.Core.AssemblyVersioning;
 
-public class AssemblyVersionProperties(SemanticVersion latestIncrementVersion)
+public class AssemblyVersionProperties(
+    SemanticVersion latestIncrementVersion,
+    bool majorVersionsAreIncompatible)
 {
     public string Version { get; }
         = latestIncrementVersion.NormalVersion
@@ -17,7 +19,9 @@ public class AssemblyVersionProperties(SemanticVersion latestIncrementVersion)
             .TrimPrefix("-", StringComparison.Ordinal);
 
     public string AssemblyVersion { get; }
-        = latestIncrementVersion.MajorVersion + ".0.0.0";
+        = majorVersionsAreIncompatible
+            ? latestIncrementVersion.MajorVersion + ".0.0.0"
+            : "1.0.0.0";
 
     public string FileVersion { get; }
         = latestIncrementVersion.NormalVersion + ".0";

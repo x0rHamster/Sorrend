@@ -4,19 +4,22 @@ using Sorrend.Core.Utilities;
 using Sorrend.Core.VersionControl;
 using Sorrend.Core.Versions;
 
-namespace Sorrend.Core.AssemblyVersioning;
+namespace Sorrend.Core.VersioningSchemes;
 
-public class SemanticVersioningScheme(CommitVersionParser commitVersionParser)
+public class SemanticVersioningScheme(CommitVersionParser commitVersionParser) : IVersioningScheme
 {
     private const int MaximumPreReleaseIdentifierCount = 3;
 
     private const string InitialVersion = "0.1.0-dev.0";
     private const string DefaultPrefixPreReleaseIdentifier = "dev";
 
-    public SemanticVersion GetInitialVersion()
+    public bool AreMajorVersionsIncompatible(VersioningSchemesConfiguration configuration)
+        => true;
+
+    public SemanticVersion GetInitialVersion(VersioningSchemesConfiguration configuration)
         => SemanticVersion.Parse(InitialVersion);
 
-    public SemanticVersion? FindBaseVersion(Commit commit)
+    public SemanticVersion? FindBaseVersion(Commit commit, VersioningSchemesConfiguration configuration)
     {
         var candidates = GetBaseVersionCandidates(commit);
 
@@ -73,7 +76,9 @@ public class SemanticVersioningScheme(CommitVersionParser commitVersionParser)
         }
     }
 
-    public void UpdateVersionIncrement(SemanticVersionIncrement versionIncrement)
+    public void UpdateVersionIncrement(
+        SemanticVersionIncrement versionIncrement,
+        VersioningSchemesConfiguration configuration)
     {
         versionIncrement.AddPreRelease(SemanticVersioningReleaseType.Patch);
     }
@@ -81,7 +86,8 @@ public class SemanticVersioningScheme(CommitVersionParser commitVersionParser)
     public SemanticVersion GetIncrementVersion(
         SemanticVersion baseVersion,
         SemanticVersionIncrement versionIncrement,
-        Commit latestIncrementCommit)
+        Commit latestIncrementCommit,
+        VersioningSchemesConfiguration configuration)
     {
         ValidateBaseVersion(baseVersion);
 

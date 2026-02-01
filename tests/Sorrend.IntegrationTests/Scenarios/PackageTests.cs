@@ -46,7 +46,7 @@ public class PackageTests(
 
         var project = await projectFactory.CreateAsync(
             specification => specification
-                .WithTargetFrameworks(TargetFramework.NetFramework472, TargetFramework.Net8)
+                .WithTargetFrameworks(TargetFramework.NetFramework472, TargetFramework.Net10)
                 .WithReference(packageManager.PackageUnderTest));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);

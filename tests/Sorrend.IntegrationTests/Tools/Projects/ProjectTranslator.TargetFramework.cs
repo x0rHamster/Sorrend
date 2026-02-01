@@ -6,7 +6,7 @@ public static partial class ProjectTranslator
         => targetFramework switch
         {
             TargetFramework.NetFramework472 => "net472",
-            TargetFramework.Net8 => "net8.0",
+            TargetFramework.Net10 => "net10.0",
 
             _ => throw new ArgumentOutOfRangeException(
                 nameof(targetFramework),

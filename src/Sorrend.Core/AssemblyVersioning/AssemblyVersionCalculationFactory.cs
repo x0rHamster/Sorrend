@@ -1,6 +1,8 @@
-﻿namespace Sorrend.Core.AssemblyVersioning;
+﻿using Sorrend.Core.VersioningSchemes;
 
-public class AssemblyVersionCalculationFactory(SemanticVersioningScheme versioningScheme)
+namespace Sorrend.Core.AssemblyVersioning;
+
+public class AssemblyVersionCalculationFactory(IVersioningScheme versioningScheme)
 {
     public AssemblyVersionCalculation Create()
         => new(versioningScheme);

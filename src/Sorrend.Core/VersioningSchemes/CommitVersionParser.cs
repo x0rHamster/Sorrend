@@ -3,7 +3,7 @@ using Sorrend.Core.Utilities;
 using Sorrend.Core.VersionControl;
 using Sorrend.Core.Versions;
 
-namespace Sorrend.Core.AssemblyVersioning;
+namespace Sorrend.Core.VersioningSchemes;
 
 public class CommitVersionParser
 {
