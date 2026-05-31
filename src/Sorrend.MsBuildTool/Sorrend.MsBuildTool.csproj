@@ -4,7 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
     <Description>Generates and injects SemVer or CalVer versions based on Git commits during the build of .NET projects.</Description>
-    <VersionPrefix>0.1.0</VersionPrefix>
     <PackageId>Sorrend.MsBuild</PackageId>
     <PackageTags>SemVer; Semantic Versioning; CalVer; Calendar Versioning; Version; Versioning; AssemblyInfo; Commit; Git</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -14,6 +13,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <PackageReference Include="Sorrend.MsBuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +33,8 @@
         description=$(PackageDescription.Replace("&lt;", "&amp;lt;"));
         copyright=$(Copyright.Replace("&lt;", "&amp;lt;"));
         tags=$(PackageTags.Replace(";", "&#59;"));
+        repositoryUrl=$(RepositoryUrl);
+        repositoryType=$(RepositoryType);
         configuration=$(Configuration);
         $(NuspecProperties)
       </NuspecProperties>
@@ -40,5 +45,18 @@
   <PropertyGroup>
     <PackageReferenceCompatibleProjectStyle>true</PackageReferenceCompatibleProjectStyle>
   </PropertyGroup>
+
+  <!-- see https://github.com/NuGet/Home/issues/6754 -->
+  <PropertyGroup>
+    <PackageId Condition=" '$(PackageId)' == '' ">$(AssemblyName)</PackageId>
+    <OriginalPackageId>$(PackageId)</OriginalPackageId>
+    <PackageId>*FakePackageId.$(MSBuildProjectName)*</PackageId>
+  </PropertyGroup>
+
+  <Target Name="ResetPackageId" BeforeTargets="_GetOutputItemsFromPack;GenerateNuspec">
+    <PropertyGroup>
+      <PackageId>$(OriginalPackageId)</PackageId>
+    </PropertyGroup>
+  </Target>
 
 </Project>

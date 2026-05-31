@@ -13,6 +13,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <PackageVersion Include="PolySharp" Version="1.15.0" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.25.0.139117" />
+    <PackageVersion Include="Sorrend.MsBuild" Version="0.1.0" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="10.0.7" />
     <PackageVersion Include="Xunit.DependencyInjection" Version="11.2.1" />

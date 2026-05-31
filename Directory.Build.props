@@ -4,6 +4,8 @@
     <Product>Sorrend</Product>
     <Copyright>Copyright 2026 Aleksandr Romanov &lt;x0rhamster@ya.ru&gt;</Copyright>
     <Authors>x0rHamster</Authors>
+    <RepositoryUrl>https://github.com/x0rHamster/Sorrend.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup>
