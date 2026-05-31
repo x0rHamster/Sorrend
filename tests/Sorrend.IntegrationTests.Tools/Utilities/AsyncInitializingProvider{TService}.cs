@@ -1,4 +1,4 @@
-﻿namespace Sorrend.IntegrationTests.Utilities;
+﻿namespace Sorrend.IntegrationTests.Tools.Utilities;
 
 public abstract class AsyncInitializingProvider<TService> : IDisposable, IAsyncDisposable
 {
@@ -24,13 +24,18 @@ public abstract class AsyncInitializingProvider<TService> : IDisposable, IAsyncD
 
     protected virtual void Dispose(bool disposing)
     {
-        if (
-            disposing
-            && _lazyInstantiationTask.IsValueCreated
-            && _lazyInstantiationTask.Value.IsCompleted
-            && _lazyInstantiationTask.Value.Result is IDisposable disposable)
+        if (disposing && _lazyInstantiationTask.IsValueCreated)
         {
-            disposable.Dispose();
+            _lazyInstantiationTask.Value.ContinueWith(
+                async task =>
+                {
+                    if (await task is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                },
+                TaskContinuationOptions.OnlyOnRanToCompletion
+                | TaskContinuationOptions.ExecuteSynchronously);
         }
     }
 

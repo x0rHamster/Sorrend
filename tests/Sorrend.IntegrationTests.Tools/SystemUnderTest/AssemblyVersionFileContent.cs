@@ -1,5 +1,5 @@
 ﻿using System.Xml.Linq;
-using Sorrend.IntegrationTests.Utilities;
+using Sorrend.IntegrationTests.Tools.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools.SystemUnderTest;
 

@@ -2,11 +2,12 @@
 using Sorrend.IntegrationTests.Tools.Packages;
 using Sorrend.IntegrationTests.Tools.Projects;
 using Sorrend.IntegrationTests.Tools.Repositories;
+using Sorrend.PackageTests.Tools;
 
-namespace Sorrend.IntegrationTests.Scenarios;
+namespace Sorrend.PackageTests.Scenarios;
 
-public class PackageTests(
-    PackageManager.Provider packageManagerProvider,
+public class ProjectCompatibilityTests(
+    PackageUnderTestProvider packageUnderTestProvider,
     ProjectFactory projectFactory,
     BuildSystem.Provider buildSystemProvider,
     GitRepositoryFactory gitRepositoryFactory,
@@ -19,13 +20,13 @@ public class PackageTests(
     [InlineData(true, true)]
     public async Task SupportsSdkStyleProjects(bool sdkStyle, bool msBuildCore)
     {
-        var packageManager = await packageManagerProvider.GetAsync();
+        var packageUnderTest = await packageUnderTestProvider.GetAsync();
         var buildSystem = await buildSystemProvider.GetAsync();
 
         var project = await projectFactory.CreateAsync(
             specification => specification
                 .WithSdkStyle(sdkStyle)
-                .WithReference(packageManager.PackageUnderTest));
+                .WithReference(packageUnderTest));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         var commit = await repository.CommitAsync();
@@ -41,23 +42,18 @@ public class PackageTests(
     [Fact]
     public async Task SupportsMultiTargetProjects()
     {
-        var packageManager = await packageManagerProvider.GetAsync();
+        var packageUnderTest = await packageUnderTestProvider.GetAsync();
         var buildSystem = await buildSystemProvider.GetAsync();
 
         var project = await projectFactory.CreateAsync(
             specification => specification
                 .WithTargetFrameworks(TargetFramework.NetFramework472, TargetFramework.Net10)
-                .WithReference(packageManager.PackageUnderTest));
+                .WithReference(packageUnderTest));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         var commit = await repository.CommitAsync();
 
         await buildSystem.BuildAsync(project);
-
-        // It is difficult to run the task once for all TFMs (see dotnet/msbuild#2781). At the same time, source
-        // generators (Roslyn, Uno) are run for each TFM separately. For these reasons, we accept the risk that
-        // restarting the task with a potentially sequential build for different TFMs will slow down the overall
-        // build process. That is why we do not check the number of task runs
 
         foreach (var assemblyFilePath in project.AssemblyFilePaths)
         {
@@ -71,13 +67,13 @@ public class PackageTests(
     [InlineData(true)]
     public async Task AffectsPackageVersion(bool sdkStyle)
     {
-        var packageManager = await packageManagerProvider.GetAsync();
+        var packageUnderTest = await packageUnderTestProvider.GetAsync();
         var buildSystem = await buildSystemProvider.GetAsync();
 
         var project = await projectFactory.CreateAsync(
             specification => specification
                 .WithSdkStyle(sdkStyle)
-                .WithReference(packageManager.PackageUnderTest));
+                .WithReference(packageUnderTest));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         var commit = await repository.CommitAsync();
@@ -87,6 +83,27 @@ public class PackageTests(
 
         var package = await packageAnalyzer.LoadAsync(project.PackageFilePath);
         Assert.Contains(commit.ShortHash, package.Version);
-        Assert.DoesNotContain(packageManager.PackageUnderTest.Id, package.DependencyPackageIds);
+        Assert.DoesNotContain(packageUnderTest.Id, package.DependencyPackageIds);
+    }
+
+    [Fact]
+    public async Task AffectsPackageVersion_ForMultiTargetProjects()
+    {
+        var packageUnderTest = await packageUnderTestProvider.GetAsync();
+        var buildSystem = await buildSystemProvider.GetAsync();
+
+        var project = await projectFactory.CreateAsync(
+            specification => specification
+                .WithTargetFrameworks(TargetFramework.NetFramework472, TargetFramework.Net10)
+                .WithReference(packageUnderTest));
+
+        var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
+        var commit = await repository.CommitAsync();
+
+        await buildSystem.BuildAsync(project);
+        await buildSystem.PackAsync(project);
+
+        var package = await packageAnalyzer.LoadAsync(project.PackageFilePath);
+        Assert.Contains(commit.ShortHash, package.Version);
     }
 }

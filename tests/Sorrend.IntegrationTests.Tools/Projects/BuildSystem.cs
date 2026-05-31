@@ -1,10 +1,14 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
 using Sorrend.Core.OperatingSystem;
-using Sorrend.IntegrationTests.Utilities;
+using Sorrend.IntegrationTests.Tools.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools.Projects;
 
+[SuppressMessage(
+    "Minor Code Smell",
+    "S1192:String literals should not be duplicated",
+    Justification = "A match of the command arguments is a false duplication")]
 public class BuildSystem
 {
     private readonly AbsolutePath? _msbuildExecutablePath;

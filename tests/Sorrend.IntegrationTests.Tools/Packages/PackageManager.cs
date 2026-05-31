@@ -1,34 +1,24 @@
 ﻿using System.IO;
 using Sorrend.Core.OperatingSystem;
-using Sorrend.IntegrationTests.Utilities;
+using Sorrend.IntegrationTests.Tools.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools.Packages;
 
 public class PackageManager
 {
-    private readonly PackageAnalyzer _packageAnalyzer;
     private readonly AbsolutePath _packageSourceDirectoryPath;
-
-    private PackageDescription? _initializedPackageUnderTest;
 
     public AbsolutePath GlobalPackagesDirectoryPath { get; }
 
-    public PackageDescription PackageUnderTest
-        => _initializedPackageUnderTest
-            ?? throw new InvalidOperationException(
-                $"The object of type \"{typeof(PackageDescription)}\" has not been initialized.");
-
     private PackageManager(
-        PackageAnalyzer packageAnalyzer,
         AbsolutePath packageSourceDirectoryPath,
         AbsolutePath globalPackagesDirectoryPath)
     {
-        _packageAnalyzer = packageAnalyzer;
         _packageSourceDirectoryPath = packageSourceDirectoryPath;
         GlobalPackagesDirectoryPath = globalPackagesDirectoryPath;
     }
 
-    private async Task<PackageDescription> PushPackageAsync(AbsolutePath filePath)
+    public async Task PublishPackageLocallyAsync(AbsolutePath filePath)
     {
         await new SystemCommand().RunAsync(
             "dotnet",
@@ -37,13 +27,9 @@ public class PackageManager
             filePath.ToString(),
             "--source",
             _packageSourceDirectoryPath.ToString());
-
-        return await _packageAnalyzer.LoadAsync(filePath);
     }
 
-    public class Provider(
-        TestingEnvironment.Provider testingEnvironmentProvider,
-        PackageAnalyzer packageAnalyzer)
+    public class Provider(TestingEnvironment.Provider testingEnvironmentProvider)
         : AsyncInitializingProvider<PackageManager>
     {
         protected override async Task<PackageManager> CreateInitializedAsync()
@@ -59,15 +45,9 @@ public class PackageManager
                 packageSourceDirectoryPath,
                 globalPackagesDirectoryPath);
 
-            var instance = new PackageManager(
-                packageAnalyzer,
+            return new PackageManager(
                 packageSourceDirectoryPath,
                 globalPackagesDirectoryPath);
-
-            instance._initializedPackageUnderTest =
-                await instance.PushPackageAsync(testingEnvironment.PackageUnderTestFilePath);
-
-            return instance;
         }
 
         private static Task InitializeEnvironmentAsync(

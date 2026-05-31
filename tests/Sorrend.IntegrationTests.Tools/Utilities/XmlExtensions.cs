@@ -1,6 +1,6 @@
 ﻿using System.Xml.Linq;
 
-namespace Sorrend.IntegrationTests.Utilities;
+namespace Sorrend.IntegrationTests.Tools.Utilities;
 
 public static class XmlExtensions
 {

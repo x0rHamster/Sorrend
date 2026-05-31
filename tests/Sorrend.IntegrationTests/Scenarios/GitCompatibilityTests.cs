@@ -1,7 +1,7 @@
-﻿using System.IO;
-using Sorrend.IntegrationTests.Tools;
+﻿using Sorrend.IntegrationTests.Tools;
 using Sorrend.IntegrationTests.Tools.Repositories;
 using Sorrend.IntegrationTests.Tools.SystemUnderTest;
+using Sorrend.IntegrationTests.Utilities;
 
 namespace Sorrend.IntegrationTests.Scenarios;
 
@@ -13,6 +13,8 @@ public class GitCompatibilityTests(
     [Fact]
     public async Task GetsCommitHistory()
     {
+        var ct = TestContext.Current.CancellationToken;
+
         var testingEnvironment = await testingEnvironmentProvider.GetAsync();
         var workingDirectoryPath = testingEnvironment.WorkingDirectoryPath;
 
@@ -30,7 +32,7 @@ public class GitCompatibilityTests(
 
         await repository.CheckoutAsync("feature");
 
-        File.WriteAllText(someRepositoryFilePath.ToString(), "contents");
+        await FileShim.WriteAllTextAsync(someRepositoryFilePath.ToString(), "contents", ct);
         await repository.CommitAsync();
 
         await repository.CheckoutAsync("develop");

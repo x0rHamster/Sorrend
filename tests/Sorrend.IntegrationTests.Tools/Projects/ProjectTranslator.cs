@@ -1,9 +1,14 @@
 ﻿using System.Xml.Linq;
 using Sorrend.Core.OperatingSystem;
-using Sorrend.IntegrationTests.Utilities;
+using Sorrend.IntegrationTests.Tools.Utilities;
+using Xunit;
 
 namespace Sorrend.IntegrationTests.Tools.Projects;
 
+[SuppressMessage(
+    "Minor Code Smell",
+    "S1192:String literals should not be duplicated",
+    Justification = "A match of the XML document identifiers is a false duplication")]
 public static partial class ProjectTranslator
 {
     private const string ChangeTokenPropertyName = "SorrendTestProjectChangeToken";

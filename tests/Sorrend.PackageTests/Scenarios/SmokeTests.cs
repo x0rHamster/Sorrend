@@ -1,12 +1,12 @@
 ﻿using Sorrend.IntegrationTests.Tools.Assemblies;
-using Sorrend.IntegrationTests.Tools.Packages;
 using Sorrend.IntegrationTests.Tools.Projects;
 using Sorrend.IntegrationTests.Tools.Repositories;
+using Sorrend.PackageTests.Tools;
 
-namespace Sorrend.IntegrationTests.Scenarios;
+namespace Sorrend.PackageTests.Scenarios;
 
-public class PackageSmokeTests(
-    PackageManager.Provider packageManagerProvider,
+public class SmokeTests(
+    PackageUnderTestProvider packageUnderTestProvider,
     ProjectFactory projectFactory,
     BuildSystem.Provider buildSystemProvider,
     GitRepositoryFactory gitRepositoryFactory,
@@ -15,11 +15,11 @@ public class PackageSmokeTests(
     [Fact]
     public async Task AffectsAssemblyVersion()
     {
-        var packageManager = await packageManagerProvider.GetAsync();
+        var packageUnderTest = await packageUnderTestProvider.GetAsync();
         var buildSystem = await buildSystemProvider.GetAsync();
 
         var project = await projectFactory.CreateAsync(
-            x => x.WithReference(packageManager.PackageUnderTest));
+            x => x.WithReference(packageUnderTest));
 
         var repository = await gitRepositoryFactory.CreateAsync(project.DirectoryPath);
         var commit = await repository.CommitAsync();

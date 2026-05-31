@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using Sorrend.Core.OperatingSystem;
-using Sorrend.IntegrationTests.Utilities;
+using Sorrend.IntegrationTests.Tools.Utilities;
 
 namespace Sorrend.IntegrationTests.Tools;
 
@@ -10,11 +10,12 @@ public sealed class TestingEnvironment : IDisposable
 
     public AbsolutePath WorkingDirectoryPath { get; }
 
-    public AbsolutePath PackageUnderTestFilePath
-        => TestAssemblyDirectoryPath / "Sorrend.MsBuildTool.nupkg";
+    public AbsolutePath TestAssemblyDirectoryPath { get; }
 
-    private AbsolutePath TestAssemblyDirectoryPath { get; }
-
+    [SuppressMessage(
+        "Major Code Smell",
+        "S6354:Use a testable date/time provider",
+        Justification = "A developer will search for the working directory using the real time of the test run")]
     private TestingEnvironment()
     {
         TestAssemblyDirectoryPath = AbsolutePath.GetAssemblyDirectory<TestingEnvironment>();

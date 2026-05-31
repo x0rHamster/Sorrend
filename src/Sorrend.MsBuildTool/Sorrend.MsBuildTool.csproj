@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
     <Description>Generates and injects SemVer or CalVer versions based on Git commits during the build of .NET projects.</Description>
     <VersionPrefix>0.1.0</VersionPrefix>
     <PackageId>Sorrend.MsBuild</PackageId>
@@ -35,5 +35,10 @@
       </NuspecProperties>
     </PropertyGroup>
   </Target>
+
+  <!-- see https://github.com/nuget/home/issues/14681 -->
+  <PropertyGroup>
+    <PackageReferenceCompatibleProjectStyle>true</PackageReferenceCompatibleProjectStyle>
+  </PropertyGroup>
 
 </Project>

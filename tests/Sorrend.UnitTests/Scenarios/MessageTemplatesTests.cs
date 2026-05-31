@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using Sorrend.Core.Utilities.MessageTemplates;
 
 namespace Sorrend.UnitTests.Scenarios;
@@ -202,7 +203,8 @@ public class MessageTemplatesTests
             ],
             CultureInfo.GetCultureInfo("es-CO"));
 
-        Assert.Equal("1234,56 or 31/12/1999 11:59:59 p. m.", result);
+        result = Regex.Replace(result, @"\s+", " "); // see https://github.com/dotnet/runtime/issues/95620
+        Assert.Equal("1234,56 or 31/12/1999 11:59:59 p. m.", result);
     }
 
     [Fact]

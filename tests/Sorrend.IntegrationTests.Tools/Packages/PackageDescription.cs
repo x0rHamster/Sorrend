@@ -1,6 +1,7 @@
 ﻿using System.Xml.Linq;
 using Sorrend.Core.OperatingSystem;
-using Sorrend.IntegrationTests.Utilities;
+using Sorrend.IntegrationTests.Tools.Utilities;
+using Xunit;
 
 namespace Sorrend.IntegrationTests.Tools.Packages;
 

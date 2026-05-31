@@ -1,42 +1,67 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <_SorrendAssemblyVersionFilePath>$(IntermediateOutputPath)$(MSBuildProjectName).Sorrend.xml</_SorrendAssemblyVersionFilePath>
+    <_SorrendAssemblyVersionFilePath>$(BaseIntermediateOutputPath)$(MSBuildProjectName).Sorrend.xml</_SorrendAssemblyVersionFilePath>
     <_SorrendGeneratedCodeFilePath>$(IntermediateOutputPath)$(MSBuildProjectName).Sorrend$(DefaultLanguageSourceExtension)</_SorrendGeneratedCodeFilePath>
-
-    <_SorrendCalculateAssemblyVersionCommand>
-      "$(MSBuildThisFileDirectory)..\tools\net472\Sorrend.MsBuildTool.exe"
-      "$(MSBuildProjectFullPath)"
-      "$(_SorrendAssemblyVersionFilePath)"
-    </_SorrendCalculateAssemblyVersionCommand>
-
-    <_SorrendBuildTargets>
-      BeforeCompile;
-      CoreCompile;
-      GetAssemblyVersion;
-    </_SorrendBuildTargets>
-
-    <_SorrendPackTargets>
-      _GetOutputItemsFromPack;
-      GenerateNuspec;
-    </_SorrendPackTargets>
   </PropertyGroup>
 
-  <Target Name="_SorrendCalculateAssemblyVersion"
-          BeforeTargets="$(_SorrendBuildTargets);$(_SorrendPackTargets)">
+  <PropertyGroup>
+    <_SorrendSetProjectPropertiesBeforeTargets>
+      GetAssemblyVersion;
+      BeforeCompile;
+      CoreCompile;
+      _GetOutputItemsFromPack;
+      GenerateNuspec;
+    </_SorrendSetProjectPropertiesBeforeTargets>
 
-    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <_SorrendWriteGeneratedCodeBeforeTargets>
+      CoreCompile;
+    </_SorrendWriteGeneratedCodeBeforeTargets>
+
+    <_SorrendCalculateAssemblyVersionBeforeTargets>
+      DispatchToInnerBuilds;
+      $(_SorrendSetProjectPropertiesBeforeTargets);
+      $(_SorrendWriteGeneratedCodeBeforeTargets);
+    </_SorrendCalculateAssemblyVersionBeforeTargets>
+  </PropertyGroup>
+
+  <Target Name="_SorrendResolveCommands">
+    <ItemGroup>
+      <_SorrendProjectTargetFramework Include="$(TargetFramework);$(TargetFrameworks)" />
+      <_SorrendDotnetMsBuildToolPath Include="@(_SorrendProjectTargetFramework->'$(MSBuildThisFileDirectory)../tools/%(Identity)/Sorrend.MsBuildTool.dll')" />
+      <_SorrendMsBuildToolPath Include="$(MSBuildThisFileDirectory)../tools/net472/Sorrend.MsBuildTool.exe" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_SorrendCommand Condition=" Exists('%(Identity)') ">"%(_SorrendMsBuildToolPath.Identity)"</_SorrendCommand>
+      <_SorrendCommand Condition=" Exists('%(Identity)') ">dotnet "%(_SorrendDotnetMsBuildToolPath.Identity)"</_SorrendCommand>
+
+      <_SorrendCalculateAssemblyVersionCommand>
+        $(_SorrendCommand)
+        "$(MSBuildProjectFullPath)"
+        "$(_SorrendAssemblyVersionFilePath)"
+      </_SorrendCalculateAssemblyVersionCommand>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_SorrendCalculateAssemblyVersion"
+          BeforeTargets="$(_SorrendCalculateAssemblyVersionBeforeTargets)"
+          DependsOnTargets="_SorrendResolveCommands"
+          Condition=" '$(IsInnerBuild)' != 'true' ">
+
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(_SorrendAssemblyVersionFilePath)'))" />
 
     <Exec Command="$([System.Text.RegularExpressions.Regex]::Replace('$(_SorrendCalculateAssemblyVersionCommand)', '\s+', ' '))" />
 
     <ItemGroup Condition=" Exists('$(_SorrendAssemblyVersionFilePath)') ">
+      <AdditionalFiles Include="$(_SorrendAssemblyVersionFilePath)" />
       <FileWrites Include="$(_SorrendAssemblyVersionFilePath)" />
     </ItemGroup>
 
   </Target>
 
   <Target Name="_SorrendSetProjectProperties"
-          BeforeTargets="$(_SorrendBuildTargets);$(_SorrendPackTargets)"
+          BeforeTargets="$(_SorrendSetProjectPropertiesBeforeTargets)"
           Condition=" Exists('$(_SorrendAssemblyVersionFilePath)') ">
 
     <XmlPeek XmlInputPath="$(_SorrendAssemblyVersionFilePath)"
@@ -61,8 +86,10 @@
   <Target Name="_SorrendWriteGeneratedCode"
           Inputs="$(_SorrendAssemblyVersionFilePath)"
           Outputs="$(_SorrendGeneratedCodeFilePath)"
-          BeforeTargets="$(_SorrendBuildTargets)"
+          BeforeTargets="$(_SorrendWriteGeneratedCodeBeforeTargets)"
           Condition=" Exists('$(_SorrendAssemblyVersionFilePath)') ">
+
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(_SorrendGeneratedCodeFilePath)'))" />
 
     <XmlPeek XmlInputPath="$(_SorrendAssemblyVersionFilePath)"
              Namespaces="&lt;Namespace Prefix='x' Uri='urn:sorrend:v0' /&gt;"

@@ -28,6 +28,9 @@ indent_size = 2
 [*.DotSettings]
 indent_style = tab
 
+[Directory.Packages.props]
+insert_final_newline = false
+
 [*.cs]
 resharper_arrange_namespace_body_highlighting = warning
 resharper_convert_to_primary_constructor_highlighting = hint
